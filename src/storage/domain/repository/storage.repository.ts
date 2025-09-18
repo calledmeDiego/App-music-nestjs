@@ -4,4 +4,6 @@ export interface StorageRepository {
     create(storage: StorageEntity): Promise<StorageEntity>;
     findById(id: string): Promise<StorageEntity | null>;
     listAll(): Promise<StorageEntity[]>;
+    update(id: string, storage: StorageEntity): Promise<StorageEntity>;
+    delete(id: string);
 }

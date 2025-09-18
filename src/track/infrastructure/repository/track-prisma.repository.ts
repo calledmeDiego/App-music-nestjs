@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { TrackEntity } from 'src/track/domain/entities/track.entity';
 import { TrackRepository } from 'src/track/domain/repository/track.repository';
@@ -11,8 +11,6 @@ export class TrackPrismaRepository implements TrackRepository {
 
   constructor(private readonly prismaService: PrismaService) { }
 
- 
-
   async create(track: TrackEntity): Promise<TrackEntity> {
 
     const createdTrack = await this.prismaService.tracks.create({
@@ -20,38 +18,14 @@ export class TrackPrismaRepository implements TrackRepository {
         name: track.name,
         album: track.album,
         cover: track.cover,
-        artist: track.artist ? {
-          name: track.artist.name,
-          nickname: track.artist.nickname,
-          nationality: track.artist.nationality,
-        } : null,
-        duration: track.duration
-          ? {
-            start: track.duration.start,
-            end: track.duration.end,
-          }
-          : null,
+        artist: track.artist,
+        duration: track.duration,
         mediaId: track.mediaId,
+        deletedAt: null
       }
     });
-
-
-
-    return new TrackEntity(
-      createdTrack.id,
-      createdTrack.name,
-      createdTrack.album,
-      createdTrack.cover,
-      createdTrack.artist ? Artist.create({
-        name: createdTrack.artist.name ?? undefined,
-        nickname: createdTrack.artist.nickname ?? undefined,
-        nationality: createdTrack.artist.nationality ?? undefined
-      }) : null,
-      createdTrack.duration ? Duration.create(<number>createdTrack.duration.start, <number>createdTrack.duration.end) : null,
-      createdTrack.mediaId,
-      createdTrack.createdAt,
-      createdTrack.updatedAt,
-    );
+    
+    return TrackEntity.ShowJSON(createdTrack);
 
   }
   async findById(id: string): Promise<TrackEntity | null> {
@@ -78,10 +52,13 @@ export class TrackPrismaRepository implements TrackRepository {
       foundTrack.mediaId,
       foundTrack.createdAt,
       foundTrack.updatedAt,
+      foundTrack.deletedAt
     )
   }
   async list(): Promise<TrackEntity[]> {
-    const allTracks = await this.prismaService.tracks.findMany();
+    const allTracks = await this.prismaService.tracks.findMany({
+      where: { deletedAt: null },
+    });
 
     return allTracks.map((t) => new TrackEntity(
       t.id,
@@ -93,6 +70,7 @@ export class TrackPrismaRepository implements TrackRepository {
       t.mediaId,
       t.createdAt,
       t.updatedAt,
+      t.deletedAt
     ))
   }
 
@@ -112,46 +90,20 @@ export class TrackPrismaRepository implements TrackRepository {
         name: track.name,
         album: track.album,
         cover: track.cover,
-        artist: track.artist ? {
-          name: track.artist.name,
-          nickname: track.artist.nickname,
-          nationality: track.artist.nationality,
-        } : null,
-        duration: track.duration
-          ? {
-            start: track.duration.start,
-            end: track.duration.end,
-          }
-          : null,
+        artist: track.artist,
+        duration: track.duration,
         mediaId: track.mediaId,
+        deletedAt: track.deletedAt
       }
     });
-
-    return new TrackEntity(
-      updatedTrack.id,
-      updatedTrack.name,
-      updatedTrack.album,
-      updatedTrack.cover,
-      updatedTrack.artist
-        ? Artist.create({
-          name: updatedTrack.artist.name ?? undefined,
-          nickname: updatedTrack.artist.nickname ?? undefined,
-          nationality: updatedTrack.artist.nationality ?? undefined,
-        })
-        : null,
-      updatedTrack.duration
-        ? Duration.create(
-          updatedTrack.duration.start as number,
-          updatedTrack.duration.end as number,
-        )
-        : null,
-      updatedTrack.mediaId,
-      updatedTrack.createdAt,
-      updatedTrack.updatedAt,
-    );
+    try {
+      return TrackEntity.ShowJSON(updatedTrack)      
+    } catch (error) {
+      throw new HttpException('Error al actualizar el track', HttpStatus.FORBIDDEN);
+    }
   }
 
-  async delete(id: string): Promise<void | TrackEntity> {
+  async softDelete(id: string): Promise<void | TrackEntity> {
     const foundTrack = await this.prismaService.tracks.findUnique({
       where: {
         id
@@ -161,10 +113,11 @@ export class TrackPrismaRepository implements TrackRepository {
       throw new NotFoundException(`Track with id ${id} not found`);
     }
 
-    await this.prismaService.tracks.delete({
-      where: {id}
+    await this.prismaService.tracks.update({
+      where: { id },
+      data: { deletedAt: new Date() }
     });
-    
+
     return new TrackEntity(
       foundTrack.id,
       foundTrack.name,
@@ -179,6 +132,7 @@ export class TrackPrismaRepository implements TrackRepository {
       foundTrack.mediaId,
       foundTrack.createdAt,
       foundTrack.updatedAt,
+      foundTrack.deletedAt
     )
   }
 }

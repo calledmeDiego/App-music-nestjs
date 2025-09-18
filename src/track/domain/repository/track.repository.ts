@@ -5,5 +5,5 @@ export interface TrackRepository {
     findById(id: string): Promise<TrackEntity | null>;
     list(): Promise<TrackEntity[]>;
     update(id: string, track: TrackEntity): Promise<TrackEntity>;
-    delete(id: string): Promise<void | TrackEntity>;
+    softDelete(id: string): Promise<void | TrackEntity>;
 }

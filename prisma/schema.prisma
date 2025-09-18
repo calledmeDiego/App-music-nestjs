@@ -60,4 +60,6 @@ model Tracks {
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt  
+
+  deletedAt  DateTime?
 }

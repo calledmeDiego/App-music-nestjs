@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { StorageEntity } from 'src/storage/domain/entities/storage.entity';
 import { StorageRepository } from 'src/storage/domain/repository/storage.repository';
@@ -18,7 +18,7 @@ export class StoragePrismaRepository implements StorageRepository {
       }
     });
 
-    return new StorageEntity(storageCreated.id, storageCreated.url, storageCreated.filename, storageCreated.createdAt, storageCreated.updatedAt);
+    return StorageEntity.ShowJson(storageCreated);
   }
 
   async findById(id: string): Promise<StorageEntity | null> {
@@ -32,31 +32,59 @@ export class StoragePrismaRepository implements StorageRepository {
 
     return new StorageEntity(storageFound.id, storageFound.url, storageFound.filename, storageFound.createdAt, storageFound.updatedAt);
   }
-  
-  
+
+
   async listAll(): Promise<StorageEntity[]> {
     const allStorages = await this.prismaService.storages.findMany();
 
-    return allStorages.map((s)=> new StorageEntity(
-      s.id, 
+    return allStorages.map((s) => new StorageEntity(
+      s.id,
       s.url,
       s.filename,
       s.createdAt,
       s.updatedAt
     ));
   }
-  //dto create
-  // create(createStorageDto: any) {
-  //   return 'This action adds a new storage';
-  // }
 
-  // findAll() {
-  //   return `This action returns all storage`;
-  // }
+  async update(id: string, storage: StorageEntity): Promise<StorageEntity> {
+    const foundStorage = await this.prismaService.storages.findUnique({
+      where: { id }
+    });
 
-  // findOne(id: number) {
-  //   return `This action returns a #${id} storage`;
-  // }
+    if (!foundStorage) {
+      throw new NotFoundException(`Storage with id ${id} not found`);
+    }
 
+    const updateStorage = await this.prismaService.storages.update({
+      where: { id },
+      data: {
+        url: storage.url,
+        filename: storage.filename,
+      }
+    });
 
+    return StorageEntity.ShowJson(updateStorage)
+  }
+
+  async delete(id: string) {
+    const foundStorage = await this.prismaService.storages.findUnique({
+      where: {
+        id
+      }
+    });
+
+    if (!foundStorage) {
+      throw new NotFoundException(`Storage with id ${id} not found`);
+    }
+
+    await this.prismaService.storages.delete({
+      where: {id}
+    });
+
+    return {
+      ...StorageEntity.ShowJson(foundStorage),
+      deleted: true
+    }
+    
+  }
 }

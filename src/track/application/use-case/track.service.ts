@@ -4,9 +4,6 @@ import type { TrackRepository } from 'src/track/domain/repository/track.reposito
 import { Artist } from 'src/track/domain/value-object/artist.vo';
 import { Duration } from 'src/track/domain/value-object/duration.vo';
 import { CreateTrackDTO } from 'src/track/application/dto/create-track.dto';
-import { GetTrackDTO } from '../dto/get-track.dto';
-
-
 
 
 @Injectable()
@@ -20,68 +17,61 @@ export class TrackService {
 
     const duration = data.duration ? Duration.create(data.duration.start, data.duration.end) : null;
 
-    const track = new TrackEntity(
-      '',
-      data.name ?? null,
-      data.album ?? null,
-      data.cover ?? null,
+    const track = TrackEntity.CreateForm({
+      name: data.name,
+      album: data.album,
+      cover: data.cover,
       artist,
       duration,
-      data.mediaId ?? null,
-      new Date(),
-      new Date(),
+      mediaId: data.mediaId
+    }
     );
 
     return await this.trackRepository.create(track);
   }
 
-  async getTrack(data: GetTrackDTO): Promise<TrackEntity | null> {
-    try {      
-      return await this.trackRepository.findById(data.id);
+  async getTrack(id: string): Promise<TrackEntity | null> {
+    try {
+      return await this.trackRepository.findById(id);
     } catch (error) {
-      throw new HttpException('No hay track', HttpStatus.NOT_FOUND);
+      throw new Error('No hay track');
     }
   }
-
 
   async listTracks(): Promise<TrackEntity[]> {
     const items = await this.trackRepository.list();
 
     if (!items.length) {
-      throw new HttpException('No hay tracks', HttpStatus.NOT_FOUND);
+      throw new Error('TracksNotFoundException');
     }
     return items;
   }
 
-  async updateTrack(getId: GetTrackDTO, data: CreateTrackDTO) {
-    const artist = data.artist ? Artist.create(data.artist) : null;
-    const duration = data.duration ? Duration.create(data.duration.start, data.duration.end): null;
+  async updateTrack(id: string, data: CreateTrackDTO) {
 
-    const track = new TrackEntity(
-      getId.id,
-      data.name ?? null,
-      data.album ?? null,
-      data.cover ?? null,
+    const existingTrack = await this.trackRepository.findById(id);
+    if (!existingTrack) {
+      throw new Error('TrackNotFoundException');
+    }
+
+    const artist = data.artist ? Artist.create(data.artist) : null;
+    const duration = data.duration ? Duration.create(data.duration.start, data.duration.end) : null;
+
+    const track = TrackEntity.CreateForm({
+      name: data.name,
+      album: data.album,
+      cover: data.cover,
       artist,
       duration,
-      data.mediaId ?? null,
-      new Date(),
-      new Date()
-    );
-
-    try {      
-      return await this.trackRepository.update(getId.id, track)
-    } catch (error) {
-      throw new HttpException('Error al actualizar el track', HttpStatus.FORBIDDEN);
-    }
-
+      mediaId: data.mediaId
+    });
+    
+    return await this.trackRepository.update(id, track)
   }
 
-  async deleteTrack(data: GetTrackDTO) {
-    try {      
-      return await this.trackRepository.delete(data.id);
-    } catch (error) {
-      throw new HttpException('No hay track', HttpStatus.NOT_FOUND);  
-    }
+  async deleteTrack(id: string) {
+
+    return await this.trackRepository.softDelete(id);
+
   }
 }

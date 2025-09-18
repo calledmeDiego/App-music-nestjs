@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Put } from '@nestjs/
 import { TrackService } from '../../application/use-case/track.service';
 import { TrackEntity } from 'src/track/domain/entities/track.entity';
 import { CreateTrackDTO } from '../../application/dto/create-track.dto';
-import { GetTrackDTO } from 'src/track/application/dto/get-track.dto';
+import { GetIdDTO } from 'src/shared/dto/get-id.dto';
 
 @Controller('tracks')
 export class TrackController {
@@ -20,13 +20,13 @@ export class TrackController {
   }
 
   @Get('/:id')
-  findOneTrack(@Param() paramId: GetTrackDTO) {
-    return this.trackService.getTrack(paramId);
+  findOneTrack(@Param() paramId: GetIdDTO) {
+    return this.trackService.getTrack(paramId.id);
   }
 
   @Put('/:id')
-  updateTrack(@Param() id: GetTrackDTO, @Body() body: CreateTrackDTO) {
-    return this.trackService.updateTrack(id, body);
+  updateTrack(@Param() paramId: GetIdDTO, @Body() body: CreateTrackDTO) {
+    return this.trackService.updateTrack(paramId.id, body);
     // return this.trackService.update(+id, updateTrackDto);
   }
 
@@ -36,7 +36,7 @@ export class TrackController {
   }
 
   @Delete('/:id')
-  remove(@Param() id: GetTrackDTO) {
-    return this.trackService.deleteTrack(id);
+  remove(@Param() paramId: GetIdDTO) {
+    return this.trackService.deleteTrack(paramId.id);
   }
 }

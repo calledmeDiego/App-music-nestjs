@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Request } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Request, Put } from '@nestjs/common';
 import { StorageService } from '../../application/use-case/storage.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerConfig } from '../config/storage.config';
+import { GetIdDTO } from 'src/shared/dto/get-id.dto';
 
 // import { CreateStorageDto } from './dto/create-storage.dto';
 // import { UpdateStorageDto } from './dto/update-storage.dto';
@@ -12,16 +13,14 @@ export class StorageController {
 
   @Post()
   @UseInterceptors(FileInterceptor('file', multerConfig))
-  async createStorage(@Body() createStorageDto: any, @UploadedFile() file: Express.Multer.File ) {
-
+  async createStorage(@UploadedFile() file: Express.Multer.File ) {
     const PUBLIC_URL = process.env.PUBLIC_URL;
-
     const fileData = {
       url: `${PUBLIC_URL}/${file.filename}`,
       filename: file.filename
     };
 
-    const data = await this.storageService.createStorage(fileData.url, fileData.filename)
+    const data = await this.storageService.createStorage({ url: fileData.url, filename: fileData.filename})
 
     return data;
   }
@@ -32,17 +31,22 @@ export class StorageController {
   }
 
   @Get(':id')
-  findOneStorage(@Param('id') id: string) {
-    return this.storageService.findStorageById(id);
+  findOneStorage(@Param() paramId: GetIdDTO) {
+    return this.storageService.findStorageById(paramId.id);
   }
 
+  @Put('/:id')
+  @UseInterceptors(FileInterceptor('file', multerConfig))
+  updateStorage(@Param() id: GetIdDTO, @UploadedFile() file: Express.Multer.File ) {
+    // return this.storageService.update(+id, updateStorageDto);
+  }
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateStorageDto: any) {
-    return this.storageService.update(+id, updateStorageDto);
+    // return this.storageService.update(+id, updateStorageDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.storageService.remove(+id);
+  remove(@Param() paramId: GetIdDTO) {
+    return this.storageService.removeStorage(paramId.id);
   }
 }

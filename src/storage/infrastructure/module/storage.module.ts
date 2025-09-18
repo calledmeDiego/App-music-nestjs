@@ -6,6 +6,7 @@ import { PrismaService } from 'src/prisma.service';
 import { StorageService } from 'src/storage/application/use-case/storage.service';
 import { StorageController } from '../controller/storage.controller';
 import { StoragePrismaRepository } from '../repository/storage-prisma.repository';
+import { FileSystemService } from '../filesystem/file-system.service';
 
 @Module({
   controllers: [StorageController],
@@ -13,6 +14,10 @@ import { StoragePrismaRepository } from '../repository/storage-prisma.repository
     {
       provide: 'StorageRepository',
       useClass: StoragePrismaRepository
+    },
+    {
+      provide: 'FileSystemPort',
+      useClass: FileSystemService
     }
   ],
 
