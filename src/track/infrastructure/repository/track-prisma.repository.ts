@@ -38,40 +38,15 @@ export class TrackPrismaRepository implements TrackRepository {
       throw new NotFoundException(`Track with id ${id} not found`);
     }
 
-    return new TrackEntity(
-      foundTrack.id,
-      foundTrack.name,
-      foundTrack.album,
-      foundTrack.cover,
-      foundTrack.artist ? Artist.create({
-        name: foundTrack.artist.name ?? undefined,
-        nickname: foundTrack.artist.nickname ?? undefined,
-        nationality: foundTrack.artist.nationality ?? undefined
-      }) : null,
-      foundTrack.duration ? Duration.create(<number>foundTrack.duration.start, <number>foundTrack.duration.end) : null,
-      foundTrack.mediaId,
-      foundTrack.createdAt,
-      foundTrack.updatedAt,
-      foundTrack.deletedAt
-    )
+    return TrackEntity.ShowJSON(foundTrack)
+    
   }
   async list(): Promise<TrackEntity[]> {
     const allTracks = await this.prismaService.tracks.findMany({
       where: { deletedAt: null },
     });
 
-    return allTracks.map((t) => new TrackEntity(
-      t.id,
-      t.name,
-      t.album,
-      t.cover,
-      t.artist ? Artist.create(<Artist>t.artist) : null,
-      t.duration ? Duration.create(<number>t.duration.start, <number>t.duration.end) : null,
-      t.mediaId,
-      t.createdAt,
-      t.updatedAt,
-      t.deletedAt
-    ))
+    return allTracks.map((t) => TrackEntity.ShowJSON(t));
   }
 
   async update(id: string, track: TrackEntity): Promise<TrackEntity> {
@@ -118,21 +93,6 @@ export class TrackPrismaRepository implements TrackRepository {
       data: { deletedAt: new Date() }
     });
 
-    return new TrackEntity(
-      foundTrack.id,
-      foundTrack.name,
-      foundTrack.album,
-      foundTrack.cover,
-      foundTrack.artist ? Artist.create({
-        name: foundTrack.artist.name ?? undefined,
-        nickname: foundTrack.artist.nickname ?? undefined,
-        nationality: foundTrack.artist.nationality ?? undefined
-      }) : null,
-      foundTrack.duration ? Duration.create(<number>foundTrack.duration.start, <number>foundTrack.duration.end) : null,
-      foundTrack.mediaId,
-      foundTrack.createdAt,
-      foundTrack.updatedAt,
-      foundTrack.deletedAt
-    )
+    return TrackEntity.ShowJSON(foundTrack)
   }
 }

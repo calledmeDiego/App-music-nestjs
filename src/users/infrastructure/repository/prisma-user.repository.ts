@@ -10,7 +10,7 @@ export class PrismaUserRepository implements UserRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(user: User): Promise<User> {
-    const created = await this.prisma.users.create({
+    const createdUser = await this.prisma.users.create({
       data: {
         email: user.email.getValue(),
         name: user.name,
@@ -19,14 +19,7 @@ export class PrismaUserRepository implements UserRepository {
       },
     });
 
-    return new User(
-      created.id,
-      Email.create(created.email),
-      created.name,
-      created.password,
-      created.role,
-      created.createdAt,
-      created.updatedAt
+    return User.ShowJSON(createdUser
     );
   }
 
@@ -51,14 +44,6 @@ export class PrismaUserRepository implements UserRepository {
     const foundUser = await this.prisma.users.findUnique({ where: { id } });
     if (!foundUser) return null;
 
-    return new User(
-      foundUser.id,
-      Email.create(foundUser.email),
-      foundUser.name,
-      foundUser.password,
-      foundUser.role,
-      foundUser.createdAt,
-      foundUser.updatedAt
-    );
+    return  User.ShowJSON(foundUser);
   }
 }

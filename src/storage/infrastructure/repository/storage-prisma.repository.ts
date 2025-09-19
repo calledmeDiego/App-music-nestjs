@@ -30,20 +30,14 @@ export class StoragePrismaRepository implements StorageRepository {
 
     if (!storageFound) return null;
 
-    return new StorageEntity(storageFound.id, storageFound.url, storageFound.filename, storageFound.createdAt, storageFound.updatedAt);
+    return StorageEntity.ShowJson(storageFound);
   }
 
 
   async listAll(): Promise<StorageEntity[]> {
     const allStorages = await this.prismaService.storages.findMany();
 
-    return allStorages.map((s) => new StorageEntity(
-      s.id,
-      s.url,
-      s.filename,
-      s.createdAt,
-      s.updatedAt
-    ));
+    return allStorages.map((s) => StorageEntity.ShowJson(s));
   }
 
   async update(id: string, storage: StorageEntity): Promise<StorageEntity> {
