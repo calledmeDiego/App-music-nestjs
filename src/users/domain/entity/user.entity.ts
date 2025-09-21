@@ -1,9 +1,7 @@
 import { Email } from "../values-object/email.vo";
 
 export class User {
-    /**
-     *
-     */
+
     constructor(
         public readonly id: string,
         public readonly email: Email,
@@ -17,6 +15,39 @@ export class User {
 
     }
 
+    static CreateForm(data: {
+        email: Email,
+        name: string,
+        password: string,
+        role: 'user' | 'admin',
+    }) {
+        return new User(
+            '',
+            data.email,
+            data.name,
+            data.password,
+            data.role,
+            new Date(),
+            new Date()
+        )
+    }
+
+    static CreateFormLogin(data: {
+        email: Email,
+        password: string,
+        role: 'user' | 'admin',
+    }) {
+        return new User(
+            '',
+            data.email,
+            '',
+            data.password,
+            data.role,
+            new Date(),
+            new Date()
+        )
+    }
+
     static ShowJSON(data) {
         return new User(
             data.id,
@@ -27,5 +58,17 @@ export class User {
             data.createdAt,
             data.updatedAt
         );
+    }
+
+    toPrimitives() {
+        return {
+            id: this.id,
+            email: this.email,
+            name: this.name,
+            role: this.role,
+            createdAt: this.createdAt,
+            updatedAt: this.updatedAt,
+            // 🚫 password no se devuelve
+        };
     }
 }
