@@ -2,9 +2,10 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from "@nestjs/config";
 import { PrismaService } from './prisma.service';
 
-import { UserModule } from './users/infrastructure/module/user.module';
+import { UserModule } from './auth/infrastructure/module/user.module';
 import { TrackModule } from './track/infrastructure/module/track.module';
 import { StorageModule } from './storage/infrastructure/module/storage.module';
+import { SlackLoggerService } from './shared/infrastructure/logging/slack-logger.service';
 
 
 
@@ -18,6 +19,7 @@ import { StorageModule } from './storage/infrastructure/module/storage.module';
     StorageModule
   ],
   controllers: [],
-  providers: [PrismaService],
+  providers: [PrismaService, SlackLoggerService],
+  exports: [SlackLoggerService]
 })
 export class AppModule { }

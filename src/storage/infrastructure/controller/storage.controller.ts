@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, Upl
 import { StorageService } from '../../application/use-case/storage.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerConfig } from '../config/storage.config';
-import { GetIdDTO } from 'src/shared/dto/get-id.dto';
+import { GetIdDTO } from 'src/shared/application/dto/get-id.dto';
 
 // import { CreateStorageDto } from './dto/create-storage.dto';
 // import { UpdateStorageDto } from './dto/update-storage.dto';
@@ -13,14 +13,14 @@ export class StorageController {
 
   @Post()
   @UseInterceptors(FileInterceptor('file', multerConfig))
-  async createStorage(@UploadedFile() file: Express.Multer.File ) {
+  async createStorage(@UploadedFile() file: Express.Multer.File) {
     const PUBLIC_URL = process.env.PUBLIC_URL;
     const fileData = {
       url: `${PUBLIC_URL}/${file.filename}`,
       filename: file.filename
     };
 
-    const data = await this.storageService.createStorage({ url: fileData.url, filename: fileData.filename})
+    const data = await this.storageService.createStorage({ url: fileData.url, filename: fileData.filename })
 
     return data;
   }
@@ -37,7 +37,7 @@ export class StorageController {
 
   @Put('/:id')
   @UseInterceptors(FileInterceptor('file', multerConfig))
-  updateStorage(@Param() id: GetIdDTO, @UploadedFile() file: Express.Multer.File ) {
+  updateStorage(@Param() id: GetIdDTO, @UploadedFile() file: Express.Multer.File) {
     // return this.storageService.update(+id, updateStorageDto);
   }
   @Patch(':id')

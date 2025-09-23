@@ -1,6 +1,6 @@
 import { Email } from "../values-object/email.vo";
 
-export class User {
+export class UserEntity {
 
     constructor(
         public readonly id: string,
@@ -21,7 +21,7 @@ export class User {
         password: string,
         role: 'user' | 'admin',
     }) {
-        return new User(
+        return new UserEntity(
             '',
             data.email,
             data.name,
@@ -37,7 +37,7 @@ export class User {
         password: string,
         role: 'user' | 'admin',
     }) {
-        return new User(
+        return new UserEntity(
             '',
             data.email,
             '',
@@ -49,7 +49,7 @@ export class User {
     }
 
     static ShowJSON(data) {
-        return new User(
+        return new UserEntity(
             data.id,
             data.email,
             data.name,

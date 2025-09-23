@@ -16,8 +16,5 @@ export class RegisterUserDTO {
     @MaxLength(15, { message: 'La contraseña no debe tener más de 15 carácteres' })
     password: string;
 
-    @IsEnum(['user', 'admin'])
-    @IsNotEmpty()
-    role: 'user'| 'admin';
-
+    
 }

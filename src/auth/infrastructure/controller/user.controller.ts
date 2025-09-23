@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { LoginUserDTO } from 'src/users/application/dto/login-user.dto';
-import { RegisterUserDTO } from 'src/users/application/dto/register-user.dto';
-import { UserService } from 'src/users/application/use-case/user.service';
+import { LoginUserDTO } from 'src/auth/application/dto/login-user.dto';
+import { RegisterUserDTO } from 'src/auth/application/dto/register-user.dto';
+import { UserService } from 'src/auth/application/use-case/user.service';
 
 
 @Controller('users')

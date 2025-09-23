@@ -3,24 +3,28 @@ import { AppModule } from './app.module';
 import * as express from "express";
 import { join } from 'path';
 import { ValidationPipe } from '@nestjs/common';
-import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
+import { HttpExceptionFilter } from './shared/infrastructure/filters/http-exception.filter';
+
+import { SlackLoggerService } from './shared/infrastructure/logging/slack-logger.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const PUERTO:string | number = process.env.PORT ?? 3000;
+  const PUERTO: string | number = process.env.PORT ?? 3000;
 
   //Configurar la carpeta storage como pública
-  app.use('/',express.static(join(process.cwd(), 'storage')));
+  app.use('/', express.static(join(process.cwd(), 'storage')));
+
+  const slackLogger = app.get(SlackLoggerService);
 
   app.useGlobalPipes(new ValidationPipe({
-     whitelist: true,   // elimina propiedades que no estén en el DTO
+    whitelist: true,   // elimina propiedades que no estén en el DTO
     forbidNonWhitelisted: true, // lanza error si llega algo no definido
     transform: true,   // convierte tipos (ej. strings a numbers)
 
   }))
-  .useGlobalFilters(
-    new HttpExceptionFilter()
-  );
+    .useGlobalFilters(
+      new HttpExceptionFilter(slackLogger)
+    );
 
   app.enableCors();
   await app.listen(PUERTO, () => {

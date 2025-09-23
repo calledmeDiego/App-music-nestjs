@@ -21,6 +21,8 @@ import { JwtTokenService } from '../security/jwt-token.service';
     },
     { provide: 'PasswordEncrypter', useClass: BcryptPasswordEncrypter },
     { provide: 'JwtToken', useClass: JwtTokenService }],
+
+    exports: ['JwtToken']
 })
 export class UserModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

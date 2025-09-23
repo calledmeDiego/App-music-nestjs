@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { StorageEntity } from 'src/storage/domain/entities/storage.entity';
 import type { StorageRepository } from 'src/storage/domain/repository/storage.repository';
 import { CreateStorageDTO } from 'src/storage/application/dto/create-storage.dto';
-import { GetIdDTO } from 'src/shared/dto/get-id.dto';
+import { GetIdDTO } from 'src/shared/application/dto/get-id.dto';
 import type { FileSystemPort } from 'src/storage/domain/repository/file-system.repository';
 // import { CreateStorageDto } from './dto/create-storage.dto';
 // import { UpdateStorageDto } from './dto/update-storage.dto';

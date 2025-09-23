@@ -2,26 +2,24 @@ import { Inject, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 
 import { UserRepository } from '../../domain/repository/user.repository';
-import { User } from '../../domain/entity/user.entity';
+import { UserEntity } from '../../domain/entity/user.entity';
 import { Email } from '../../domain/values-object/email.vo';
-import type { PasswordEncrypter } from 'src/users/domain/repository/password-encrypter.repository';
+import type { PasswordEncrypter } from 'src/auth/domain/repository/password-encrypter.repository';
 import type { JwtTokenService } from '../security/jwt-token.service';
 
 @Injectable()
 export class UserPrismaRepository implements UserRepository {
   constructor(
     private readonly prisma: PrismaService,
-    @Inject('PasswordEncrypter')  private readonly passwordEncrypter: PasswordEncrypter, 
+    @Inject('PasswordEncrypter') private readonly passwordEncrypter: PasswordEncrypter,
     @Inject('JwtToken') private readonly jwtService: JwtTokenService,
   ) { }
 
-  async login(user: User): Promise<any> {
-    console.log('Estoy en userprisma repository:');
+  async login(user: UserEntity): Promise<any> {
 
     const userFounded = await this.findByEmail(user.email);
-    if(!userFounded) throw new Error('No se encontro');
-    console.log('userFounded:', userFounded);
-
+    if (!userFounded) throw new Error('No se encontro');
+  
     const isValid = await this.passwordEncrypter.compare(user.password, userFounded.password);
 
     if (!isValid) throw new Error('Invalid credentials');
@@ -35,11 +33,11 @@ export class UserPrismaRepository implements UserRepository {
       token: token,
       user: userFounded
     };
-    
+
     return dataUser;
   }
 
-  async register(user: User): Promise<any> {
+  async register(user: UserEntity): Promise<any> {
 
     const hashed = await this.passwordEncrypter.encrypt(user.password);
 
@@ -51,18 +49,18 @@ export class UserPrismaRepository implements UserRepository {
         role: user.role,
       },
     });
-    user = User.ShowJSON(createdUser);
+    user = UserEntity.ShowJSON(createdUser);
 
     return user.toPrimitives()
   }
 
-  async findByEmail(email: Email): Promise<User | null> {
+  async findByEmail(email: Email): Promise<UserEntity | null> {
     const found = await this.prisma.users.findUnique({
       where: { email: email.getValue() },
     });
     if (!found) return null;
 
-    return new User(
+    return new UserEntity(
       found.id,
       Email.create(found.email),
       found.name,
@@ -72,11 +70,10 @@ export class UserPrismaRepository implements UserRepository {
       found.updatedAt
     );
   }
-
-  async findById(id: string): Promise<User | null> {
+  async findById(id: string): Promise<UserEntity | null> {
     const foundUser = await this.prisma.users.findUnique({ where: { id } });
     if (!foundUser) return null;
 
-    return User.ShowJSON(foundUser);
+    return UserEntity.ShowJSON(foundUser);
   }
 }
