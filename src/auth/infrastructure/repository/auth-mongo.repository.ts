@@ -1,14 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma.service';
+import { PrismaService } from 'src/shared/infrastructure/prisma/services/prisma.service';
 
-import { UserRepository } from '../../domain/repository/user.repository';
+import { AuthRepository } from '../../domain/repository/auth.repository';
 import { UserEntity } from '../../domain/entity/user.entity';
 import { Email } from '../../domain/values-object/email.vo';
 import type { PasswordEncrypter } from 'src/auth/domain/repository/password-encrypter.repository';
 import type { JwtTokenService } from '../security/jwt-token.service';
 
 @Injectable()
-export class UserPrismaRepository implements UserRepository {
+export class AuthMongoRepository implements AuthRepository {
   constructor(
     private readonly prisma: PrismaService,
     @Inject('PasswordEncrypter') private readonly passwordEncrypter: PasswordEncrypter,
@@ -19,7 +19,7 @@ export class UserPrismaRepository implements UserRepository {
 
     const userFounded = await this.findByEmail(user.email);
     if (!userFounded) throw new Error('No se encontro');
-  
+
     const isValid = await this.passwordEncrypter.compare(user.password, userFounded.password);
 
     if (!isValid) throw new Error('Invalid credentials');
@@ -41,7 +41,7 @@ export class UserPrismaRepository implements UserRepository {
 
     const hashed = await this.passwordEncrypter.encrypt(user.password);
 
-    const createdUser = await this.prisma.users.create({
+    const createdUser = await this.prisma.mongo.users.create({
       data: {
         email: user.email.getValue(),
         name: user.name,
@@ -55,7 +55,7 @@ export class UserPrismaRepository implements UserRepository {
   }
 
   async findByEmail(email: Email): Promise<UserEntity | null> {
-    const found = await this.prisma.users.findUnique({
+    const found = await this.prisma.mongo.users.findUnique({
       where: { email: email.getValue() },
     });
     if (!found) return null;
@@ -71,7 +71,7 @@ export class UserPrismaRepository implements UserRepository {
     );
   }
   async findById(id: string): Promise<UserEntity | null> {
-    const foundUser = await this.prisma.users.findUnique({ where: { id } });
+    const foundUser = await this.prisma.mongo.users.findUnique({ where: { id } });
     if (!foundUser) return null;
 
     return UserEntity.ShowJSON(foundUser);

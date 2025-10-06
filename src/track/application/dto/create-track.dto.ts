@@ -1,8 +1,11 @@
 import { Type } from "class-transformer";
-import { IsMongoId, isNotEmpty, IsNotEmpty, IsNumber, IsString, IsUrl, ValidateNested } from "class-validator";
+import { IsMongoId, isNotEmpty, IsNotEmpty, IsNumber, IsString, IsUrl, Matches, ValidateNested } from "class-validator";
 
 export class ArtistDTO {
     @IsString()
+    @Matches(/^[A-ZÁÉÍÓÚÑ][a-záéíóúñA-ZÁÉÍÓÚÑ\s]*$/, {
+        message: 'El nombre debe comenzar con mayúscula',
+    })
     @IsNotEmpty()
     name: string;
 
@@ -26,7 +29,7 @@ export class DurationDTO {
 }
 
 export class CreateTrackDTO {
-    
+
     @IsString()
     @IsNotEmpty()
     name: string;
@@ -35,7 +38,7 @@ export class CreateTrackDTO {
     @IsNotEmpty()
     album: string;
 
-    @IsMongoId()
+
     @IsNotEmpty()
     mediaId: string;
 
@@ -47,7 +50,7 @@ export class CreateTrackDTO {
     @Type(() => ArtistDTO)
     artist: ArtistDTO
 
-    @ValidateNested()   
+    @ValidateNested()
     @IsNotEmpty()
     @Type(() => DurationDTO)
     duration: DurationDTO

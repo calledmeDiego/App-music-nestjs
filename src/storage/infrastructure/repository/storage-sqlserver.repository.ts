@@ -6,12 +6,12 @@ import { StorageRepository } from 'src/storage/domain/repository/storage.reposit
 // import { UpdateStorageDto } from './dto/update-storage.dto';
 
 @Injectable()
-export class StorageMongoRepository implements StorageRepository {
+export class StorageSqlserverRepository implements StorageRepository {
 
   constructor(private readonly prismaService: PrismaService) { }
 
   async create(storage: StorageEntity): Promise<StorageEntity> {
-    const storageCreated = await this.prismaService.mongo.storages.create({
+    const storageCreated = await this.prismaService.sql.storages.create({
       data: {
         filename: storage.filename,
         url: storage.url
@@ -22,7 +22,7 @@ export class StorageMongoRepository implements StorageRepository {
   }
 
   async findById(id: string): Promise<StorageEntity | null> {
-    const storageFound = await this.prismaService.mongo.storages.findUnique({
+    const storageFound = await this.prismaService.sql.storages.findUnique({
       where: {
         id
       }
@@ -35,13 +35,13 @@ export class StorageMongoRepository implements StorageRepository {
 
 
   async listAll(): Promise<StorageEntity[]> {
-    const allStorages = await this.prismaService.mongo.storages.findMany();
+    const allStorages = await this.prismaService.sql.storages.findMany();
 
     return allStorages.map((s) => StorageEntity.ShowJson(s));
   }
 
   async update(id: string, storage: StorageEntity): Promise<StorageEntity> {
-    const foundStorage = await this.prismaService.mongo.storages.findUnique({
+    const foundStorage = await this.prismaService.sql.storages.findUnique({
       where: { id }
     });
 
@@ -49,7 +49,7 @@ export class StorageMongoRepository implements StorageRepository {
       throw new NotFoundException(`Storage with id ${id} not found`);
     }
 
-    const updateStorage = await this.prismaService.mongo.storages.update({
+    const updateStorage = await this.prismaService.sql.storages.update({
       where: { id },
       data: {
         url: storage.url,
@@ -61,7 +61,7 @@ export class StorageMongoRepository implements StorageRepository {
   }
 
   async delete(id: string) {
-    const foundStorage = await this.prismaService.mongo.storages.findUnique({
+    const foundStorage = await this.prismaService.sql.storages.findUnique({
       where: {
         id
       }
@@ -71,7 +71,7 @@ export class StorageMongoRepository implements StorageRepository {
       throw new NotFoundException(`Storage with id ${id} not found`);
     }
 
-    await this.prismaService.mongo.storages.delete({
+    await this.prismaService.sql.storages.delete({
       where: { id }
     });
 

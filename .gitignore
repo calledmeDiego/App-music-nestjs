@@ -59,3 +59,8 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 /storage
 
+# Prisma: Archivos generados
+# Estas carpetas contienen los Prisma Client para diferentes bases de datos
+/prisma/sqlserver/generated
+/prisma/mongodb/generated
+

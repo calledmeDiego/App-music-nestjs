@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+  output = "./generated"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("SQLSERVER_URL")
+}
+
+model Users {
+  id        String   @id @default(uuid()) @db.UniqueIdentifier
+  email     String   @unique
+  name      String?
+  password  String
+  role      String     @default("user")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Storages {
+  id        String   @id @default(uuid()) @db.UniqueIdentifier
+  url       String
+  filename  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tracks    Tracks?
+}
+
+model Artist {
+  id          String   @id @default(uuid()) @db.UniqueIdentifier
+  name        String? 
+  nickname    String?
+  nationality String?
+
+  tracks      Tracks[]
+}
+
+model Duration {
+  id     String  @id @default(uuid()) @db.UniqueIdentifier
+  start  Int?
+  end    Int?
+
+  tracks Tracks?
+}
+
+model Tracks {
+  id         String    @id @default(uuid()) @db.UniqueIdentifier
+  name       String?
+  album      String?
+  cover      String?
+
+  artist     Artist?   @relation(fields: [artistId], references: [id])
+  artistId   String?   @db.UniqueIdentifier
+
+  duration   Duration? @relation(fields: [durationId], references: [id])
+  durationId String?   @unique @db.UniqueIdentifier
+
+  mediaId    String?   @unique @db.UniqueIdentifier
+  media      Storages? @relation(fields: [mediaId], references: [id])
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+}
+

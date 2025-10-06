@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { UserEntity } from 'src/auth/domain/entity/user.entity';
-import type { UserRepository } from 'src/auth/domain/repository/user.repository';
+import type { AuthRepository } from 'src/auth/domain/repository/auth.repository';
 import { Email } from 'src/auth/domain/values-object/email.vo';
 import { RegisterUserDTO } from '../dto/register-user.dto';
 import type { PasswordEncrypter } from 'src/auth/domain/repository/password-encrypter.repository';
@@ -11,7 +11,7 @@ import { JwtTokenService } from 'src/auth/infrastructure/security/jwt-token.serv
 @Injectable()
 export class UserService {
   constructor(
-    @Inject('UserRepository') private readonly userRepository: UserRepository
+    @Inject('AuthRepository') private readonly userRepository: AuthRepository
   ) { }
 
   async registerUser(data: RegisterUserDTO) {

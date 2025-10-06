@@ -65,7 +65,7 @@ export class TrackService {
       duration,
       mediaId: data.mediaId
     });
-    
+
     return await this.trackRepository.update(id, track)
   }
 

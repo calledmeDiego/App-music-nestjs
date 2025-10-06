@@ -14,13 +14,14 @@ export class TrackController {
   @Post()
   @Roles('admin')
   postTrack(@Body() body: CreateTrackDTO) {
-    // console.log(body)
+
     return this.trackService.createTrack(body);
   }
 
   @Get('')
   @Roles('user', 'admin')
   findAllTracks() {
+    
     return this.trackService.listTracks();
   }
 

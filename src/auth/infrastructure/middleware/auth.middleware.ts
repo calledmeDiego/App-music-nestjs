@@ -7,7 +7,6 @@ import { JwtTokenService } from '../security/jwt-token.service';
 export class AuthMiddleware implements NestMiddleware {
 
    use(req: Request, res: Response, next: NextFunction) {
-    console.log('Paso por el middleware')
     next();
 
   }
