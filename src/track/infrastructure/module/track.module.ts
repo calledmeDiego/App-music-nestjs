@@ -6,6 +6,7 @@ import { TrackMongoRepository } from '../repository/track-mongo.repository';
 import { PrismaService } from 'src/shared/infrastructure/prisma/services/prisma.service';
 import { AuthModule } from 'src/auth/infrastructure/module/auth.module';
 import { TrackSqlServerRepository } from '../repository/track-sqlserver.repository';
+import { StorageModule } from 'src/storage/infrastructure/module/storage.module';
 
 const trackRepoProvider: Provider = {
   provide: 'TrackRepository',
@@ -14,7 +15,7 @@ const trackRepoProvider: Provider = {
 }
 @Module({
   controllers: [TrackController],
-  imports: [AuthModule],
+  imports: [AuthModule, StorageModule],
   providers: [TrackService, PrismaService, trackRepoProvider
   ],
 })

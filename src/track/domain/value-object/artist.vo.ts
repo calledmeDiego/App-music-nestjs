@@ -3,5 +3,5 @@ export class Artist {
 
     static create(props: {name?: string, nickname?: string, nationality?: string}){
         return new Artist(props.name , props.nickname , props.nationality);
-    }
+    }    
 }

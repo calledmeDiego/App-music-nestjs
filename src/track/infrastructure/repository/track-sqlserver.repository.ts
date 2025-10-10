@@ -5,11 +5,9 @@ import { TrackRepository } from "src/track/domain/repository/track.repository";
 
 @Injectable()
 export class TrackSqlServerRepository implements TrackRepository {
-    constructor(private readonly prismaService: PrismaService) {
+    constructor(private readonly prismaService: PrismaService) { }
 
-    }
-
-    async create(track: TrackEntity): Promise<any> {
+    async create(track: TrackEntity): Promise<TrackEntity> {
         let artistId: string | undefined;
         let durationId: string | undefined;
 
@@ -38,24 +36,22 @@ export class TrackSqlServerRepository implements TrackRepository {
                 cover: track.cover,
                 artistId,
                 durationId,
-                mediaId: track.mediaId,
+                mediaId: track.mediaId || null,
                 deletedAt: null
             },
             include: {
                 artist: true,
                 duration: true,
-                media: true,
             }
 
         });
 
-        const media = createdTrack.media;
-        return { ...TrackEntity.ShowJSON(createdTrack),
-            media
-         };
+        return TrackEntity.toParse(createdTrack);
+
+
     }
 
-    async findById(id: string): Promise<any> {
+    async findById(id: string): Promise<TrackEntity | null> {
         const foundTrack = await this.prismaService.sql.tracks.findUnique({
             where: {
                 id
@@ -63,20 +59,15 @@ export class TrackSqlServerRepository implements TrackRepository {
             include: {
                 artist: true,
                 duration: true,
-                media: true
             }
         })
-        if (!foundTrack) {
-            throw new NotFoundException(`Track with id ${id} not found`);
-        }
-        const media = foundTrack.media;
+        if(!foundTrack) return null;
 
-        return {...TrackEntity.ShowJSON(foundTrack),
-           media
-        }
+        return TrackEntity.toParse(foundTrack);
+
     }
 
-    async list(): Promise<any[]> {
+    async list(): Promise<TrackEntity[]> {
         const allTracks = await this.prismaService.sql.tracks.findMany({
             where: { deletedAt: null },
             include: {
@@ -86,17 +77,12 @@ export class TrackSqlServerRepository implements TrackRepository {
             }
         });
 
-        return allTracks.map((t) => ({...TrackEntity.ShowJSON(t),
-            media: t.media
-        }));
+        return allTracks.map((t) => {
+            return TrackEntity.toParse(t)            
+        });
     }
 
-    async update(id: string, track: TrackEntity): Promise<any> {
-        const foundTrack = await this.findById(id)
-
-        if (!foundTrack) {
-            throw new NotFoundException(`Track with id ${id} not found`);
-        }
+    async update(id: string, track: TrackEntity): Promise<TrackEntity> {
         const artistId = await this.findOrCreateorUpdateArtist({
             name: <string>track.artist?.name,
             nickname: <string>track.artist?.nickname,
@@ -124,28 +110,25 @@ export class TrackSqlServerRepository implements TrackRepository {
                     connect: { id: <string>track.mediaId }
                 },
                 deletedAt: track.deletedAt
+            },
+            include: {
+                artist: true,
+                duration: true
             }
         });
-        try {
-            return TrackEntity.ShowJSON(updatedTrack)
-        } catch (error) {
-            throw new HttpException('Error al actualizar el track', HttpStatus.FORBIDDEN);
-        }
+
+
+        return TrackEntity.toParse(updatedTrack);
     }
 
     async softDelete(id: string): Promise<any> {
-        const foundTrack = await this.findById(id);
 
-        if (!foundTrack) {
-            throw new NotFoundException(`Track with id ${id} not found`);
-        }
-
-        await this.prismaService.sql.tracks.update({
+        const deletedTrack = await this.prismaService.sql.tracks.update({
             where: { id },
             data: { deletedAt: new Date() }
         });
 
-        return TrackEntity.ShowJSON(foundTrack)
+        return TrackEntity.toParse(deletedTrack)
     }
 
     async findOrCreateorUpdateArtist(artist: {

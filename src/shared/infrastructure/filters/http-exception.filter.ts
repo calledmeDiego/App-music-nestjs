@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { SlackLoggerService } from '../logging/slack-logger.service';
+import { DomainError } from 'src/shared/domain/exception/domain-error.exception';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -24,7 +25,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Error interno del servidor';
 
-    if (exception instanceof HttpException) {
+    if (exception instanceof DomainError) {
+      status = exception.httpStatus;
+      message = exception.message;
+    }
+    else if (exception instanceof HttpException) {
       status = exception.getStatus();
       const res = exception.getResponse();
       message =

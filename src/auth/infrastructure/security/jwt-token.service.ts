@@ -4,8 +4,6 @@ import jwt from "jsonwebtoken";
 
 @Injectable()
 export class JwtTokenService implements JwtToken {
-
-
     constructor(@Inject('JWT_SECRET') private readonly secret: string) { }
 
 

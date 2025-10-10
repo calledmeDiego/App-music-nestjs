@@ -20,7 +20,12 @@ export class StorageEntity{
         );
     }
 
-    static ShowJson(data) {
+    toPrimitives() {
+        const { updatedAt,...publicData } = this;
+        return publicData;
+    }  
+
+    static toParse(data) {
         return new StorageEntity(
             data.id,
             data.url,

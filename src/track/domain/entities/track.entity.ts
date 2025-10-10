@@ -15,11 +15,7 @@ export class TrackEntity {
         public readonly deletedAt: Date | null
     ) { }
 
-    public toJson() {
-        const {mediaId, deletedAt, ...publicData} = this;
-
-        return publicData;
-    }
+    
 
     static CreateForm(data: {
         name?: string | null,
@@ -40,9 +36,15 @@ export class TrackEntity {
             new Date(),
             null)
     }
+
+    toPrimitives() {
+        const {mediaId, deletedAt, ...publicData} = this;
+
+        return publicData;
+    }
     
 
-    static ShowJSON(data) {
+    static toParse(data) {
         const entity = new TrackEntity(
             data.id,
             data.name,
@@ -56,6 +58,6 @@ export class TrackEntity {
             null
         );
 
-        return entity.toJson();
+        return entity;
     }    
 }

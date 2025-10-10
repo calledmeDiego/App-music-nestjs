@@ -1,4 +1,5 @@
 import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { Console } from 'console';
 import { MongoPrismaService } from 'src/shared/infrastructure/prisma/services/mongo-prisma.service';
 import { PrismaService } from 'src/shared/infrastructure/prisma/services/prisma.service';
 import { TrackEntity } from 'src/track/domain/entities/track.entity';
@@ -10,10 +11,10 @@ import { Duration } from 'src/track/domain/value-object/duration.vo';
 @Injectable()
 export class TrackMongoRepository implements TrackRepository {
 
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) { }
 
-  async create(track: TrackEntity): Promise<any> {
-    
+  async create(track: TrackEntity): Promise<TrackEntity> {
+
     const createdTrack = await this.prismaService.mongo.tracks.create({
       data: {
         name: track.name,
@@ -24,57 +25,37 @@ export class TrackMongoRepository implements TrackRepository {
         mediaId: track.mediaId,
         deletedAt: null
       }
-    })
-    return TrackEntity.ShowJSON(createdTrack);
+    });
+    
+    return TrackEntity.toParse(createdTrack);
   }
 
-  async findById(id: string): Promise<any> {
-    const foundTrack =await this.prismaService.mongo.tracks.findUnique({
+  async findById(id: string): Promise<TrackEntity | null> {
+    const foundTrack = await this.prismaService.mongo.tracks.findUnique({
       where: {
         id
       }
-    })
-
-    if (!foundTrack) {
-      throw new NotFoundException(`Track with id ${id} not found`);
-    }
-    const storage = await this.prismaService.mongo.storages.findUnique({
-      where: { id: foundTrack.mediaId || ''}
     });
 
+    if(!foundTrack) return null;
 
-    return {...TrackEntity.ShowJSON(foundTrack),
-      media: storage
-    }
+    return TrackEntity.toParse(foundTrack);
 
   }
-  async list(): Promise<any[]> {
+
+  async list(): Promise<TrackEntity[]> {
     const allTracks = await this.prismaService.mongo.tracks.findMany({
       where: { deletedAt: null },
     });
-    const mediaIds: string[] = allTracks.map(t => t.mediaId!);
 
-    const storages = await this.prismaService.mongo.storages.findMany({
-      where: { id: {in: mediaIds}}
+    const tracks = allTracks.map((t) => {
+       return TrackEntity.toParse(t);
     });
-
-    const storageMap = new Map(storages.map(s => [s.id, s]));
-//  return allTracks.map((t) => TrackEntity.ShowJSON(t));
-    return allTracks.map((t) => ({
-      ...TrackEntity.ShowJSON(t),
-      media: storageMap.get(t.mediaId!) || null
-    }));
+    
+    return tracks;
   }
 
-  async update(id: string, track: TrackEntity): Promise<any> {
-
-    const foundTrack = await this.prismaService.mongo.tracks.findUnique({
-      where: { id }
-    });
-
-    if (!foundTrack) {
-      throw new NotFoundException(`Track with id ${id} not found`);
-    }
+  async update(id: string, track: TrackEntity): Promise<TrackEntity> {
 
     const updatedTrack = await this.prismaService.mongo.tracks.update({
       where: { id },
@@ -88,28 +69,15 @@ export class TrackMongoRepository implements TrackRepository {
         deletedAt: track.deletedAt
       }
     });
-    try {
-      return TrackEntity.ShowJSON(updatedTrack)
-    } catch (error) {
-      throw new HttpException('Error al actualizar el track', HttpStatus.FORBIDDEN);
-    }
+
+    return TrackEntity.toParse(updatedTrack)
+
   }
 
   async softDelete(id: string): Promise<any> {
-    const foundTrack = await this.prismaService.mongo.tracks.findUnique({
-      where: {
-        id
-      }
-    })
-    if (!foundTrack) {
-      throw new NotFoundException(`Track with id ${id} not found`);
-    }
-
-    await this.prismaService.mongo.tracks.update({
+    return await this.prismaService.mongo.tracks.update({
       where: { id },
       data: { deletedAt: new Date() }
     });
-
-    return TrackEntity.ShowJSON(foundTrack)
   }
 }

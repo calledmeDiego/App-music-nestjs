@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/shared/infrastructure/prisma/services/prisma.service';
+import { StorageRepresentation } from 'src/storage/application/representation/storage.representation';
+
 import { StorageEntity } from 'src/storage/domain/entities/storage.entity';
 import { StorageRepository } from 'src/storage/domain/repository/storage.repository';
-// import { CreateStorageDto } from './dto/create-storage.dto';
-// import { UpdateStorageDto } from './dto/update-storage.dto';
 
 @Injectable()
 export class StorageMongoRepository implements StorageRepository {
@@ -18,36 +18,46 @@ export class StorageMongoRepository implements StorageRepository {
       }
     });
 
-    return StorageEntity.ShowJson(storageCreated);
+    const storageResponse = StorageEntity.toParse(storageCreated);
+
+    return storageResponse;
   }
 
-  async findById(id: string): Promise<StorageEntity | null> {
+  async findById(id: string): Promise<StorageEntity|null> {
     const storageFound = await this.prismaService.mongo.storages.findUnique({
       where: {
         id
       }
     });
-
-    if (!storageFound) return null;
-
-    return StorageEntity.ShowJson(storageFound);
+    if(!storageFound) return null;
+ 
+    const storage = StorageEntity.toParse(storageFound);
+    return storage;
   }
 
 
   async listAll(): Promise<StorageEntity[]> {
     const allStorages = await this.prismaService.mongo.storages.findMany();
 
-    return allStorages.map((s) => StorageEntity.ShowJson(s));
+    const storages = allStorages.map((s) => StorageEntity.toParse(s));
+    return storages;
   }
 
-  async update(id: string, storage: StorageEntity): Promise<StorageEntity> {
-    const foundStorage = await this.prismaService.mongo.storages.findUnique({
-      where: { id }
+  async findManyById(ids: string[]): Promise<StorageEntity[]> {
+    const allStorages = await this.prismaService.mongo.storages.findMany({
+      where: {
+        id: {
+          in: ids
+        }
+      }
     });
 
-    if (!foundStorage) {
-      throw new NotFoundException(`Storage with id ${id} not found`);
-    }
+    const storages = allStorages.map((s) => StorageEntity.toParse(s));
+
+    return storages;
+  }
+
+  async update(id: string, storage: StorageEntity): Promise<any> {
 
     const updateStorage = await this.prismaService.mongo.storages.update({
       where: { id },
@@ -57,28 +67,18 @@ export class StorageMongoRepository implements StorageRepository {
       }
     });
 
-    return StorageEntity.ShowJson(updateStorage)
+    return StorageRepresentation.fromStorage(updateStorage).format();
   }
 
   async delete(id: string) {
-    const foundStorage = await this.prismaService.mongo.storages.findUnique({
-      where: {
-        id
-      }
-    });
 
-    if (!foundStorage) {
-      throw new NotFoundException(`Storage with id ${id} not found`);
-    }
-
-    await this.prismaService.mongo.storages.delete({
+    let deletedStorage = await this.prismaService.mongo.storages.delete({
       where: { id }
     });
 
-    return {
-      ...StorageEntity.ShowJson(foundStorage),
-      deleted: true
-    }
+    deletedStorage = StorageEntity.toParse(deletedStorage);
+
+    return deletedStorage;
 
   }
 }

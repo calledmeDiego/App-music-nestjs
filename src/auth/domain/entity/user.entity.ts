@@ -10,12 +10,9 @@ export class UserEntity {
         public readonly role: 'user' | 'admin',
         public readonly createdAt: Date,
         public readonly updatedAt: Date,
+    ) {}
 
-    ) {
-
-    }
-
-    static CreateForm(data: {
+    static CreateRegisterForm(data: {
         email: Email,
         name: string,
         password: string,
@@ -29,10 +26,10 @@ export class UserEntity {
             data.role,
             new Date(),
             new Date()
-        )
+        );
     }
 
-    static CreateFormLogin(data: {
+    static CreateLoginForm(data: {
         email: Email,
         password: string,
         role: 'user' | 'admin',
@@ -45,10 +42,10 @@ export class UserEntity {
             data.role,
             new Date(),
             new Date()
-        )
+        );
     }
 
-    static ShowJSON(data) {
+    static toParse(data) {
         return new UserEntity(
             data.id,
             data.email,
@@ -56,19 +53,12 @@ export class UserEntity {
             data.password,
             data.role,
             data.createdAt,
-            data.updatedAt
+            data.updatedAt            
         );
     }
 
     toPrimitives() {
-        return {
-            id: this.id,
-            email: this.email,
-            name: this.name,
-            role: this.role,
-            createdAt: this.createdAt,
-            updatedAt: this.updatedAt,
-            // 🚫 password no se devuelve
-        };
-    }
+        const { password, ...publicData } = this;
+        return publicData;
+    }    
 }
