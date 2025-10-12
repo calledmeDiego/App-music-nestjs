@@ -6,10 +6,15 @@ import { ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './shared/infrastructure/filters/http-exception.filter';
 
 import { SlackLoggerService } from './shared/infrastructure/logging/slack-logger.service';
+import { EnvService } from './shared/infrastructure/config/env.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const PUERTO: string | number = process.env.PORT ?? 3000;
+
+  const envService = app.get(EnvService);
+
+  const PUERTO = envService.port;
+
 
   //Configurar la carpeta storage como pública
   app.use('/', express.static(join(process.cwd(), 'storage')));

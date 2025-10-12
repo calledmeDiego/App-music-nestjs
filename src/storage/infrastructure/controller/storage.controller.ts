@@ -1,44 +1,44 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Request, Put, HttpStatus, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Request, Put, HttpStatus, Res, UseGuards } from '@nestjs/common';
 import { StorageService } from '../../application/use-case/storage.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { multerConfig } from '../config/storage.config';
 import { GetIdDTO } from 'src/shared/application/dto/get-id.dto';
 import type { Response } from 'express';
 import { UploadedFileError } from 'src/storage/domain/exception/file-upload.exception';
+import { AuthGuard } from 'src/auth/infrastructure/guards/auth.guard';
+import { RolesGuard } from 'src/auth/infrastructure/guards/roles.guard';
+import { Roles } from 'src/auth/infrastructure/decorators/roles.decorator';
 
 
 @Controller('storage')
+@UseGuards(AuthGuard, RolesGuard)
 export class StorageController {
   constructor(private readonly storageService: StorageService) { }
 
   @Post()
+  @Roles('admin')
   @UseInterceptors(FileInterceptor('file', multerConfig))
   async createStorage(@UploadedFile() file: Express.Multer.File, @Res() res: Response) {
 
     if (!file) {
-        throw new UploadedFileError();
+      throw new UploadedFileError();
     }
-    
-    const PUBLIC_URL = process.env.PUBLIC_URL;
-    const fileData = {
-      url: `${PUBLIC_URL}/${file.filename}`,
-      filename: file.filename
-    };
-
-    const data = await this.storageService.createStorage({ url: fileData.url, filename: fileData.filename })
+    const data = await this.storageService.createStorage(file)
     return res.status(HttpStatus.CREATED).json(data);
   }
 
   @Get()
-  findAllStorages(@Res() res: Response) {
-    const allStorages = this.storageService.findAllStorages();
+  @Roles('user','admin')
+  async findAllStorages(@Res() res: Response) {
+    const allStorages = await this.storageService.findAllStorages();
     return res.status(HttpStatus.OK).json(allStorages);
 
   }
 
   @Get(':id')
-  findOneStorage(@Param() paramId: GetIdDTO, @Res() res: Response) {
-    const foundStorage = this.storageService.findStorageById(paramId.id);
+  @Roles('user','admin')
+  async findOneStorage(@Param() paramId: GetIdDTO, @Res() res: Response) {
+    const foundStorage = await this.storageService.findStorageById(paramId.id);
     return res.status(HttpStatus.OK).json(foundStorage);
 
   }
@@ -54,8 +54,9 @@ export class StorageController {
   }
 
   @Delete(':id')
-  remove(@Param() paramId: GetIdDTO, @Res() res: Response) {
-    const deletedStorage = this.storageService.removeStorage(paramId.id);
+  @Roles('admin')
+  async remove(@Param() paramId: GetIdDTO, @Res() res: Response) {
+    const deletedStorage = await this.storageService.removeStorage(paramId.id);
     return res.status(HttpStatus.OK).json(deletedStorage);
   }
 }

@@ -8,15 +8,27 @@ import type { FileSystemPort } from 'src/storage/domain/repository/file-system.r
 import { StorageNotFoundException } from 'src/storage/domain/exception/storage-not-found.exception';
 import { StorageRepresentation } from '../representation/storage.representation';
 import { StoragesRepresentation } from '../representation/storages.representation';
+import { EnvService } from 'src/shared/infrastructure/config/env.service';
 
 @Injectable()
 export class StorageService {
 
-  constructor(@Inject('StorageRepository') private readonly storageRepository: StorageRepository, @Inject('FileSystemPort') private readonly fileSystem: FileSystemPort) { }
+  constructor(
+    @Inject('StorageRepository') private readonly storageRepository: StorageRepository, @Inject('FileSystemPort') private readonly fileSystem: FileSystemPort,
+    private readonly envService: EnvService,
+  ) { }
 
   //dto create en el parametro
-  async createStorage(data: CreateStorageDTO) {
-    const storage = StorageEntity.CreateFormStorage({ url: data.url, filename: data.filename });
+  async createStorage(file: Express.Multer.File) {
+
+     const PUBLIC_URL = this.envService.publicUrl;
+    
+    const fileData = {
+      url: `${PUBLIC_URL}/${file.filename}`,
+      filename: file.filename
+    };
+
+    const storage = StorageEntity.CreateFormStorage({ url: fileData.url, filename: fileData.filename });
 
     const storageCreated = await this.storageRepository.create(storage);
     return StorageRepresentation.fromStorage(storageCreated).format();
@@ -36,8 +48,7 @@ export class StorageService {
     const foundStorage = await this.storageRepository.findById(id)
     if (!foundStorage) throw new StorageNotFoundException();
 
-    const storage = StorageRepresentation.fromStorage(StorageEntity.toParse(foundStorage)).format();
-    return storage;
+    return StorageRepresentation.fromStorage(foundStorage).format();
   }
 
   // update dto
@@ -55,7 +66,7 @@ export class StorageService {
   async removeStorage(id: string) {
     const storage = await this.storageRepository.findById(id);
 
-    if(!storage) throw new StorageNotFoundException();
+    if (!storage) throw new StorageNotFoundException();
 
     await this.fileSystem.deleteFile(storage.filename);
 

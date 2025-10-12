@@ -7,11 +7,12 @@ import { Email } from '../../domain/values-object/email.vo';
 import type { PasswordEncrypter } from 'src/auth/domain/repository/password-encrypter.repository';
 import type { JwtTokenService } from '../security/jwt-token.service';
 import { UserRepresentation } from 'src/auth/application/representation/user.representation';
+import { SqlServerPrismaService } from 'src/shared/infrastructure/prisma/services/sqlserver-prisma.service';
 
 @Injectable()
 export class AuthSqlServerRepository implements AuthRepository {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly prisma: SqlServerPrismaService,
   ) { }
 
   login(user: UserEntity) {
@@ -20,7 +21,7 @@ export class AuthSqlServerRepository implements AuthRepository {
   }
 
   async register(user: UserEntity): Promise<UserEntity> {
-    const createdUser = await this.prisma.sql.users.create({
+    const createdUser = await this.prisma.users.create({
       data: {
         email: user.email.getValue(),
         name: user.name,
@@ -32,7 +33,7 @@ export class AuthSqlServerRepository implements AuthRepository {
   }
 
   async findByEmail(email: Email): Promise<UserEntity | null> {
-    const found = await this.prisma.sql.users.findUnique({
+    const found = await this.prisma.users.findUnique({
       where: { email: email.getValue() },
     });
     if (!found) return null;
@@ -41,7 +42,7 @@ export class AuthSqlServerRepository implements AuthRepository {
   }
   
   async findById(id: string): Promise<any> {
-    const foundUser = await this.prisma.sql.users.findUnique({ where: { id } });
+    const foundUser = await this.prisma.users.findUnique({ where: { id } });
     if (!foundUser) return null;
 
     return UserRepresentation.fromUser(foundUser).format();

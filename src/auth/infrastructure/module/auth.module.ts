@@ -8,18 +8,35 @@ import { BcryptPasswordEncrypter } from '../security/password-encrypter.service'
 import { JwtTokenService } from '../security/jwt-token.service';
 import { AuthSqlServerRepository } from '../repository/auth-sqlserver.repository';
 
-const authRepoProvider: Provider = {
+import { EnvService } from 'src/shared/infrastructure/config/env.service';
+import { EnvModule } from 'src/shared/infrastructure/config/env.module';
+
+import { DatabaseModule } from 'src/shared/infrastructure/prisma/module/database.module';
+
+export const createAuthRepoProvider = (env: EnvService): Provider => ({
   provide: 'AuthRepository',
-  useClass:
-    <string>process.env.DB_PROVIDER! === 'mongo' ? AuthMongoRepository : AuthSqlServerRepository
-}
+  useClass: env.dbProvider === 'mongo'
+    ? AuthMongoRepository
+    : AuthSqlServerRepository,
+});
 
 @Module({
+  imports: [DatabaseModule, EnvModule],
   controllers: [AuthController],
-  providers: [PrismaService, AuthService, authRepoProvider,
+  providers: [PrismaService, AuthService,
+    {
+      provide: 'AuthRepository',
+      useFactory: (dbInstance: any, envService: EnvService) => {
+        const dbProvider = envService.dbProvider.trim();
+        return dbProvider === 'mongo' ? new AuthMongoRepository(dbInstance) : new AuthSqlServerRepository(dbInstance);
+      },
+      inject: ['DATABASE_INSTANCE', EnvService]
+
+    },
     {
       provide: 'JWT_SECRET',
-      useValue: <string>process.env.JWT_SECRET || 'changeme'
+      inject: [EnvService],
+      useFactory: (env: EnvService) => env.jwtSecret,
     },
     { provide: 'PasswordEncrypter', useClass: BcryptPasswordEncrypter },
     { provide: 'JwtToken', useClass: JwtTokenService }],

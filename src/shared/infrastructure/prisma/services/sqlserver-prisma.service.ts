@@ -3,10 +3,9 @@ import { PrismaClient as SqlServerPrismaClient } from "../../../../../prisma/sql
 
 @Injectable()
 export class SqlServerPrismaService extends SqlServerPrismaClient implements OnModuleInit, OnModuleDestroy {
-
     async onModuleInit() {
         await this.$connect()
-        console.log('Conectado a SQL Server')
+        console.log('✅ Conectado a SqlServer');
     }
 
     async onModuleDestroy() {

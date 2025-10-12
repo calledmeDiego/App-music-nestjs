@@ -1,11 +1,12 @@
 import { HttpException, HttpStatus, Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "src/shared/infrastructure/prisma/services/prisma.service";
+import { SqlServerPrismaService } from "src/shared/infrastructure/prisma/services/sqlserver-prisma.service";
 import { TrackEntity } from "src/track/domain/entities/track.entity";
 import { TrackRepository } from "src/track/domain/repository/track.repository";
 
 @Injectable()
 export class TrackSqlServerRepository implements TrackRepository {
-    constructor(private readonly prismaService: PrismaService) { }
+    constructor(private readonly prismaService: SqlServerPrismaService) { }
 
     async create(track: TrackEntity): Promise<TrackEntity> {
         let artistId: string | undefined;
@@ -29,7 +30,7 @@ export class TrackSqlServerRepository implements TrackRepository {
         }
 
 
-        const createdTrack = await this.prismaService.sql.tracks.create({
+        const createdTrack = await this.prismaService.tracks.create({
             data: {
                 name: track.name,
                 album: track.album,
@@ -52,7 +53,7 @@ export class TrackSqlServerRepository implements TrackRepository {
     }
 
     async findById(id: string): Promise<TrackEntity | null> {
-        const foundTrack = await this.prismaService.sql.tracks.findUnique({
+        const foundTrack = await this.prismaService.tracks.findUnique({
             where: {
                 id
             },
@@ -68,7 +69,7 @@ export class TrackSqlServerRepository implements TrackRepository {
     }
 
     async list(): Promise<TrackEntity[]> {
-        const allTracks = await this.prismaService.sql.tracks.findMany({
+        const allTracks = await this.prismaService.tracks.findMany({
             where: { deletedAt: null },
             include: {
                 artist: true,
@@ -89,7 +90,7 @@ export class TrackSqlServerRepository implements TrackRepository {
             nationality: <string>track.artist?.nationality,
         });
 
-        const updatedTrack = await this.prismaService.sql.tracks.update({
+        const updatedTrack = await this.prismaService.tracks.update({
             where: { id },
             data: {
                 name: track.name,
@@ -123,7 +124,7 @@ export class TrackSqlServerRepository implements TrackRepository {
 
     async softDelete(id: string): Promise<any> {
 
-        const deletedTrack = await this.prismaService.sql.tracks.update({
+        const deletedTrack = await this.prismaService.tracks.update({
             where: { id },
             data: { deletedAt: new Date() }
         });
@@ -141,7 +142,7 @@ export class TrackSqlServerRepository implements TrackRepository {
         let artistId: string | null;
 
         if (existingArtist) {
-            const updatedArtist = await this.prismaService.sql.artist.update({
+            const updatedArtist = await this.prismaService.artist.update({
                 where: {
                     id: existingArtist.id
                 },
@@ -154,7 +155,7 @@ export class TrackSqlServerRepository implements TrackRepository {
             artistId = updatedArtist.id;
         } else {
 
-            const createdArtist = await this.prismaService.sql.artist.create({
+            const createdArtist = await this.prismaService.artist.create({
                 data: {
                     name: artist.name,
                     nickname: artist.nickname,
@@ -167,7 +168,7 @@ export class TrackSqlServerRepository implements TrackRepository {
     }
 
     async findArtist(artist: string) {
-        const artistCreated = await this.prismaService.sql.artist.findFirst({
+        const artistCreated = await this.prismaService.artist.findFirst({
             where: {
                 name: {
                     equals: artist,
@@ -181,7 +182,7 @@ export class TrackSqlServerRepository implements TrackRepository {
         start: number,
         end: number
     }) {
-        const durationCreated = await this.prismaService.sql.duration.create({
+        const durationCreated = await this.prismaService.duration.create({
             data: {
                 start: duration.start,
                 end: duration.end,

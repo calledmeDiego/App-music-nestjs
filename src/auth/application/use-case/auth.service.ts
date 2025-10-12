@@ -8,8 +8,9 @@ import { UserNotFoundError } from 'src/auth/domain/exception/user-not-found.exce
 import { EmailAlreadyRegisteredException } from 'src/auth/domain/exception/email-registered.exception';
 import type { PasswordEncrypter } from 'src/auth/domain/repository/password-encrypter.repository';
 import type { JwtToken } from 'src/auth/domain/repository/jwt-token-repository';
-import { InvalidTokenError } from 'src/auth/domain/exception/invalid-token.exception';
+
 import { UserRepresentation } from '../representation/user.representation';
+import { InvalidPasswordError } from 'src/auth/domain/exception/invalid-password.exception';
 
 
 @Injectable()
@@ -40,6 +41,7 @@ export class AuthService {
   }
 
   async loginUser(data: LoginUserDTO) {
+  
     const userFounded = await this.findByEmailUser(data.email);
 
     if (!userFounded) throw new UserNotFoundError(data.email);
@@ -47,7 +49,7 @@ export class AuthService {
 
     const isValid = await this.passwordEncrypter.compare(data.password, userFounded!.password);
 
-    if (!isValid) throw new InvalidTokenError();
+    if (!isValid) throw new InvalidPasswordError();
 
     const token = this.jwtService.sign({
       id: userFounded!.id,
@@ -64,6 +66,7 @@ export class AuthService {
 
   async findByEmailUser(email: string) {
     const emailVO = Email.create(email);
+
     const user = await this.authRepository.findByEmail(emailVO);
 
     return user;

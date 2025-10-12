@@ -7,16 +7,22 @@ import { PrismaService } from 'src/shared/infrastructure/prisma/services/prisma.
 import { AuthModule } from 'src/auth/infrastructure/module/auth.module';
 import { TrackSqlServerRepository } from '../repository/track-sqlserver.repository';
 import { StorageModule } from 'src/storage/infrastructure/module/storage.module';
+import { DatabaseModule } from 'src/shared/infrastructure/prisma/module/database.module';
+import { EnvModule } from 'src/shared/infrastructure/config/env.module';
+import { EnvService } from 'src/shared/infrastructure/config/env.service';
 
-const trackRepoProvider: Provider = {
-  provide: 'TrackRepository',
-  useClass:
-    <string>process.env.DB_PROVIDER === 'mongo' ? TrackMongoRepository : TrackSqlServerRepository
-}
 @Module({
   controllers: [TrackController],
-  imports: [AuthModule, StorageModule],
-  providers: [TrackService, PrismaService, trackRepoProvider
+  imports: [AuthModule, StorageModule, DatabaseModule, EnvModule],
+  providers: [TrackService, PrismaService,
+    {
+      provide: 'TrackRepository',
+      useFactory: (dbInstance: any, envService: EnvService) => {
+        const dbProvider = envService.dbProvider.trim();
+        return dbProvider === 'mongo' ? new TrackMongoRepository(dbInstance) : new TrackSqlServerRepository(dbInstance);
+      },
+      inject: ['DATABASE_INSTANCE', EnvService]
+    }
   ],
 })
 export class TrackModule {

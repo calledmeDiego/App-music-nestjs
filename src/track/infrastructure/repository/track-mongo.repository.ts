@@ -11,11 +11,11 @@ import { Duration } from 'src/track/domain/value-object/duration.vo';
 @Injectable()
 export class TrackMongoRepository implements TrackRepository {
 
-  constructor(private readonly prismaService: PrismaService) { }
+  constructor(private readonly prismaService: MongoPrismaService) { }
 
   async create(track: TrackEntity): Promise<TrackEntity> {
 
-    const createdTrack = await this.prismaService.mongo.tracks.create({
+    const createdTrack = await this.prismaService.tracks.create({
       data: {
         name: track.name,
         album: track.album,
@@ -31,7 +31,7 @@ export class TrackMongoRepository implements TrackRepository {
   }
 
   async findById(id: string): Promise<TrackEntity | null> {
-    const foundTrack = await this.prismaService.mongo.tracks.findUnique({
+    const foundTrack = await this.prismaService.tracks.findUnique({
       where: {
         id
       }
@@ -44,7 +44,7 @@ export class TrackMongoRepository implements TrackRepository {
   }
 
   async list(): Promise<TrackEntity[]> {
-    const allTracks = await this.prismaService.mongo.tracks.findMany({
+    const allTracks = await this.prismaService.tracks.findMany({
       where: { deletedAt: null },
     });
 
@@ -57,7 +57,7 @@ export class TrackMongoRepository implements TrackRepository {
 
   async update(id: string, track: TrackEntity): Promise<TrackEntity> {
 
-    const updatedTrack = await this.prismaService.mongo.tracks.update({
+    const updatedTrack = await this.prismaService.tracks.update({
       where: { id },
       data: {
         name: track.name,
@@ -75,7 +75,7 @@ export class TrackMongoRepository implements TrackRepository {
   }
 
   async softDelete(id: string): Promise<any> {
-    return await this.prismaService.mongo.tracks.update({
+    return await this.prismaService.tracks.update({
       where: { id },
       data: { deletedAt: new Date() }
     });

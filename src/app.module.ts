@@ -8,17 +8,8 @@ import { StorageModule } from './storage/infrastructure/module/storage.module';
 import { SlackLoggerService } from './shared/infrastructure/logging/slack-logger.service';
 import { SqlServerPrismaService } from './shared/infrastructure/prisma/services/sqlserver-prisma.service';
 import { MongoPrismaService } from './shared/infrastructure/prisma/services/mongo-prisma.service';
+import { EnvModule } from './shared/infrastructure/config/env.module';
 
-// const prismaProvider: Provider = {
-//   provide:PrismaService,
-//   useFactory: () => {
-//     if (process.env.DB_PROVIDER === 'mongo') {
-//       return new MongoPrismaService();
-//     } 
-//     return new SqlServerPrismaService();
-
-//   }
-// }
 
 @Module({
   imports: [
@@ -27,7 +18,8 @@ import { MongoPrismaService } from './shared/infrastructure/prisma/services/mong
     }),
     AuthModule,
     TrackModule,
-    StorageModule
+    StorageModule,
+    EnvModule
   ],
   controllers: [],
   providers: [PrismaService, SlackLoggerService],

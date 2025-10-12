@@ -4,19 +4,20 @@ import { AuthRepository } from '../../domain/repository/auth.repository';
 import { UserEntity } from '../../domain/entity/user.entity';
 import { Email } from '../../domain/values-object/email.vo';
 import { UserRepresentation } from 'src/auth/application/representation/user.representation';
+import { MongoPrismaService } from 'src/shared/infrastructure/prisma/services/mongo-prisma.service';
 
 @Injectable()
 export class AuthMongoRepository implements AuthRepository {
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly prisma: MongoPrismaService,
   ) { }
 
   login(user: UserEntity) {
     console.log('No hay nada aqui');
   }
 
-  async register(user: UserEntity): Promise<any> {
-    const createdUser = await this.prisma.mongo.users.create({
+  async register(user: UserEntity): Promise<UserEntity> {
+    const createdUser = await this.prisma.users.create({
       data: {
         email: user.email.getValue(),
         name: user.name,
@@ -29,8 +30,7 @@ export class AuthMongoRepository implements AuthRepository {
   }
 
   async findByEmail(email: Email): Promise<UserEntity | null> {
-    
-    const found = await this.prisma.mongo.users.findUnique({
+    const found = await this.prisma.users.findUnique({
       where: { email: email.getValue() },
     });
     if (!found) return null;
@@ -39,7 +39,7 @@ export class AuthMongoRepository implements AuthRepository {
   }
 
   async findById(id: string): Promise<any> {
-    const foundUser = await this.prisma.mongo.users.findUnique({ where: { id } });
+    const foundUser = await this.prisma.users.findUnique({ where: { id } });
     if (!foundUser) return null;
 
     return UserRepresentation.fromUser(foundUser).format();
