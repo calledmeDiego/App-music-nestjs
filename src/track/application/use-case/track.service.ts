@@ -113,7 +113,7 @@ export class TrackService {
     await this.trackRepository.softDelete(id);
 
     return {
-      deleted: true
+      deletedTrack: true
     };
   }
 }

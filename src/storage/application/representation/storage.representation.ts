@@ -10,8 +10,7 @@ export class StorageRepresentation {
     }
 
     public format() {
-        const storage = this.storage.toPrimitives()
-
+        const storage = this.storage.toPrimitives();
         return {
             id: storage.id,
             url: storage.url,
