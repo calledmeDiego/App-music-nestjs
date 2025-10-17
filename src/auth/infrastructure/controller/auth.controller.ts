@@ -34,7 +34,7 @@ export class AuthController {
     return response.status(HttpStatus.CREATED).json(registeredUser);
   }
 
-  @ApiOperation({ summary: 'Autentica un usuario en el sistema' })
+  @ApiOperation({ summary: 'Inicia sesión y obtiene JWT' })
   @ApiBody({
     type: LoginUserDTO,
     description: 'Estructura del JSON para la autenticación'
