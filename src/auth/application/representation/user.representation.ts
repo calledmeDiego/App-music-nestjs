@@ -1,5 +1,5 @@
-import { UserEntity } from "src/auth/domain/entity/user.entity";
-import { Email } from "src/auth/domain/values-object/email.vo";
+import { UserEntity } from "src/auth/domain/entities/user.entity";
+import { Email } from "src/auth/domain/value-objects/email.vo";
 
 export class UserRepresentation {
     private constructor(private readonly user: UserEntity) { }

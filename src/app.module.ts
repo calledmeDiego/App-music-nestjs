@@ -1,16 +1,18 @@
-import { Module, Provider } from '@nestjs/common';
+import { Global, Module, Provider } from '@nestjs/common';
 import { ConfigModule } from "@nestjs/config";
-import { PrismaService } from './shared/infrastructure/prisma/services/prisma.service';
+
 
 import { AuthModule } from './auth/infrastructure/module/auth.module';
 import { TrackModule } from './track/infrastructure/module/track.module';
 import { StorageModule } from './storage/infrastructure/module/storage.module';
 import { SlackLoggerService } from './shared/infrastructure/logging/slack-logger.service';
-import { SqlServerPrismaService } from './shared/infrastructure/prisma/services/sqlserver-prisma.service';
+
+import { EnvService } from './shared/infrastructure/config/env.service';
 import { MongoPrismaService } from './shared/infrastructure/prisma/services/mongo-prisma.service';
-import { EnvModule } from './shared/infrastructure/config/env.module';
+import { SqlServerPrismaService } from './shared/infrastructure/prisma/services/sqlserver-prisma.service';
 
 
+@Global()
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -18,11 +20,37 @@ import { EnvModule } from './shared/infrastructure/config/env.module';
     }),
     AuthModule,
     TrackModule,
-    StorageModule,
-    EnvModule
+    StorageModule
+
+
   ],
   controllers: [],
-  providers: [PrismaService, SlackLoggerService],
-  exports: [SlackLoggerService, PrismaService]
+  providers: [ SlackLoggerService, EnvService,
+    {
+      provide: 'DATABASE_INSTANCE',
+      // Usamos useFactory para la lógica de decisión, pero solo dentro de este módulo
+      useFactory: async (envService: EnvService) => {
+        const dbProvider = envService.dbProvider.trim();
+
+        if (!globalThis['dbInstance']) {
+
+          if (dbProvider === 'mongo') {
+            const mongoService = new MongoPrismaService();
+            await mongoService.onModuleInit();
+            const nuevoarray = [dbProvider, mongoService];
+            globalThis['dbInstance'] = mongoService;
+          } else {
+            const sqlService = new SqlServerPrismaService();
+            await sqlService.onModuleInit();
+            globalThis['dbInstance'] = sqlService;
+          }
+        }
+        return globalThis['dbInstance'];
+      },
+      inject: [EnvService],
+    }
+  ],
+
+  exports: [SlackLoggerService, EnvService, 'DATABASE_INSTANCE']
 })
 export class AppModule { }

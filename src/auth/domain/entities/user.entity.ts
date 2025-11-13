@@ -1,8 +1,10 @@
-import { Email } from "../values-object/email.vo";
+import { DomainEvent } from "src/shared/domain/events/domain-event.base";
+import { Email } from "../value-objects/email.vo";
+import { UserRegisteredEvent } from "../events/user-registered.event";
+import { AggregateRoot } from "src/shared/domain/events/aggregate-root";
 
-export class UserEntity {
-
-    constructor(
+export class UserEntity extends AggregateRoot {
+    private constructor(
         public readonly id: string,
         public readonly email: Email,
         public readonly name: string | null,
@@ -10,7 +12,7 @@ export class UserEntity {
         public readonly role: 'user' | 'admin',
         public readonly createdAt: Date,
         public readonly updatedAt: Date,
-    ) {}
+    ) { super() }
 
     static CreateRegisterForm(data: {
         email: Email,
@@ -18,7 +20,7 @@ export class UserEntity {
         password: string,
         role: 'user' | 'admin',
     }) {
-        return new UserEntity(
+        const user = new UserEntity(
             '',
             data.email,
             data.name,
@@ -27,9 +29,10 @@ export class UserEntity {
             new Date(),
             new Date()
         );
+        return user;
     }
 
-    static CreateLoginForm(data: {
+    public static CreateLoginForm(data: {
         email: Email,
         password: string,
         role: 'user' | 'admin',
@@ -53,12 +56,12 @@ export class UserEntity {
             data.password,
             data.role,
             data.createdAt,
-            data.updatedAt            
+            data.updatedAt
         );
     }
 
     toPrimitives() {
         const { password, ...publicData } = this;
         return publicData;
-    }    
+    }
 }

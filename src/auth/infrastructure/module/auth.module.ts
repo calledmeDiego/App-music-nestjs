@@ -1,31 +1,27 @@
-import { MiddlewareConsumer, Module, NestModule, Provider, RequestMethod } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AuthService } from '../../application/use-case/auth.service';
 import { AuthController } from '../controller/auth.controller';
 import { AuthMongoRepository } from '../repository/auth-mongo.repository';
-import { PrismaService } from 'src/shared/infrastructure/prisma/services/prisma.service';
 
 import { BcryptPasswordEncrypter } from '../security/password-encrypter.service';
 import { JwtTokenService } from '../security/jwt-token.service';
 import { AuthSqlServerRepository } from '../repository/auth-sqlserver.repository';
 
 import { EnvService } from 'src/shared/infrastructure/config/env.service';
-import { EnvModule } from 'src/shared/infrastructure/config/env.module';
 
-import { DatabaseModule } from 'src/shared/infrastructure/prisma/module/database.module';
-
-export const createAuthRepoProvider = (env: EnvService): Provider => ({
-  provide: 'AuthRepository',
-  useClass: env.dbProvider === 'mongo'
-    ? AuthMongoRepository
-    : AuthSqlServerRepository,
-});
+import { authRepositoryName } from 'src/auth/domain/repository/auth.repository';
+import { passwordEncrypterRepositoryName } from 'src/auth/domain/repository/password-encrypter.repository';
+import { jwtRepositoryName } from 'src/auth/domain/repository/jwt-token-repository';
+import { UserRegistrationDomainService } from 'src/auth/domain/services/user-registration.domain-service';
+import { UserLoginDomainService } from 'src/auth/domain/services/user-login.domain-service';
 
 @Module({
-  imports: [DatabaseModule, EnvModule],
+  imports: [],
   controllers: [AuthController],
-  providers: [PrismaService, AuthService,
+  providers: [AuthService, UserRegistrationDomainService,
+    UserLoginDomainService,
     {
-      provide: 'AuthRepository',
+      provide: authRepositoryName,
       useFactory: (dbInstance: any, envService: EnvService) => {
         const dbProvider = envService.dbProvider.trim();
         return dbProvider === 'mongo' ? new AuthMongoRepository(dbInstance) : new AuthSqlServerRepository(dbInstance);
@@ -35,13 +31,13 @@ export const createAuthRepoProvider = (env: EnvService): Provider => ({
     },
     {
       provide: 'JWT_SECRET',
-      inject: [EnvService],
       useFactory: (env: EnvService) => env.jwtSecret,
+      inject: [EnvService]
     },
-    { provide: 'PasswordEncrypter', useClass: BcryptPasswordEncrypter },
-    { provide: 'JwtToken', useClass: JwtTokenService }],
+    { provide: passwordEncrypterRepositoryName, useClass: BcryptPasswordEncrypter },
+    { provide: jwtRepositoryName, useClass: JwtTokenService }],
 
-  exports: ['JwtToken']
+  exports: [jwtRepositoryName]
 })
 export class AuthModule {
 

@@ -1,8 +1,8 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { TrackEntity } from 'src/track/domain/entities/track.entity';
 import type { TrackRepository } from 'src/track/domain/repository/track.repository';
-import { Artist } from 'src/track/domain/value-object/artist.vo';
-import { Duration } from 'src/track/domain/value-object/duration.vo';
+import { Artist } from 'src/track/domain/value-objects/artist.vo';
+import { Duration } from 'src/track/domain/value-objects/duration.vo';
 import { CreateTrackDTO } from 'src/track/application/dto/create-track.dto';
 import { TrackNotFoundException } from 'src/track/domain/exception/track-not-found.exception';
 import { ArtistNullException } from 'src/track/domain/exception/artist-null.exception';

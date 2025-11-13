@@ -3,3 +3,5 @@ export interface JwtToken {
     verify<T>(token: string): T | null;
     decode<T>(token: string): T | null;
 }
+
+export const jwtRepositoryName = 'JwtToken';

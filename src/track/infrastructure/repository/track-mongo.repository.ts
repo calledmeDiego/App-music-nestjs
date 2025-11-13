@@ -1,11 +1,9 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
-import { Console } from 'console';
+import { Injectable } from '@nestjs/common';
+
 import { MongoPrismaService } from 'src/shared/infrastructure/prisma/services/mongo-prisma.service';
-import { PrismaService } from 'src/shared/infrastructure/prisma/services/prisma.service';
 import { TrackEntity } from 'src/track/domain/entities/track.entity';
 import { TrackRepository } from 'src/track/domain/repository/track.repository';
-import { Artist } from 'src/track/domain/value-object/artist.vo';
-import { Duration } from 'src/track/domain/value-object/duration.vo';
+
 
 
 @Injectable()
@@ -26,7 +24,7 @@ export class TrackMongoRepository implements TrackRepository {
         deletedAt: null
       }
     });
-    
+
     return TrackEntity.toParse(createdTrack);
   }
 
@@ -37,7 +35,7 @@ export class TrackMongoRepository implements TrackRepository {
       }
     });
 
-    if(!foundTrack) return null;
+    if (!foundTrack) return null;
 
     return TrackEntity.toParse(foundTrack);
 
@@ -49,9 +47,9 @@ export class TrackMongoRepository implements TrackRepository {
     });
 
     const tracks = allTracks.map((t) => {
-       return TrackEntity.toParse(t);
+      return TrackEntity.toParse(t);
     });
-    
+
     return tracks;
   }
 

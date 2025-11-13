@@ -6,7 +6,6 @@ import jwt from "jsonwebtoken";
 export class JwtTokenService implements JwtToken {
     constructor(@Inject('JWT_SECRET') private readonly secret: string) { }
 
-
     sign(payload: object, expiresIn: string = '2h'): string {
         return jwt.sign(payload, this.secret, { expiresIn })
     }

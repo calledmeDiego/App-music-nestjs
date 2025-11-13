@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { MongoPrismaService } from 'src/shared/infrastructure/prisma/services/mongo-prisma.service';
-import { PrismaService } from 'src/shared/infrastructure/prisma/services/prisma.service';
 import { StorageRepresentation } from 'src/storage/application/representation/storage.representation';
 
 import { StorageEntity } from 'src/storage/domain/entities/storage.entity';

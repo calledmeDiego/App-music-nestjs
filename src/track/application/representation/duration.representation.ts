@@ -1,5 +1,5 @@
 import { DurationNullException } from "src/track/domain/exception/duration-null.exception";
-import { Duration } from "src/track/domain/value-object/duration.vo";
+import { Duration } from "src/track/domain/value-objects/duration.vo";
 
 
 export class DurationRepresentation {
@@ -13,8 +13,8 @@ export class DurationRepresentation {
         const duration = this.duration;
 
         return {
-            start : duration.start,
-            end : duration.end,
+            start: duration.start,
+            end: duration.end,
         }
     }
 }

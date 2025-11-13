@@ -1,11 +1,8 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/shared/infrastructure/prisma/services/prisma.service';
+import { Injectable } from '@nestjs/common';
 
 import { AuthRepository } from '../../domain/repository/auth.repository';
-import { UserEntity } from '../../domain/entity/user.entity';
-import { Email } from '../../domain/values-object/email.vo';
-import type { PasswordEncrypter } from 'src/auth/domain/repository/password-encrypter.repository';
-import type { JwtTokenService } from '../security/jwt-token.service';
+import { UserEntity } from '../../domain/entities/user.entity';
+import { Email } from '../../domain/value-objects/email.vo';
 import { UserRepresentation } from 'src/auth/application/representation/user.representation';
 import { SqlServerPrismaService } from 'src/shared/infrastructure/prisma/services/sqlserver-prisma.service';
 
@@ -40,7 +37,7 @@ export class AuthSqlServerRepository implements AuthRepository {
 
     return UserEntity.toParse(found);
   }
-  
+
   async findById(id: string): Promise<any> {
     const foundUser = await this.prisma.users.findUnique({ where: { id } });
     if (!foundUser) return null;

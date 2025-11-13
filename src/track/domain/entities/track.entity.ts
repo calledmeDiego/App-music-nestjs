@@ -1,5 +1,5 @@
-import { Artist } from "../value-object/artist.vo";
-import { Duration } from "../value-object/duration.vo";
+import { Artist } from "../value-objects/artist.vo";
+import { Duration } from "../value-objects/duration.vo";
 
 export class TrackEntity {
     constructor(
@@ -15,7 +15,7 @@ export class TrackEntity {
         public readonly deletedAt: Date | null
     ) { }
 
-    
+
 
     static CreateForm(data: {
         name?: string | null,
@@ -38,11 +38,11 @@ export class TrackEntity {
     }
 
     toPrimitives() {
-        const {mediaId, deletedAt, ...publicData} = this;
+        const { mediaId, deletedAt, ...publicData } = this;
 
         return publicData;
     }
-    
+
 
     static toParse(data) {
         const entity = new TrackEntity(
@@ -59,5 +59,5 @@ export class TrackEntity {
         );
 
         return entity;
-    }    
+    }
 }

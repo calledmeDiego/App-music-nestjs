@@ -1,5 +1,5 @@
-import { UserEntity } from "../entity/user.entity";
-import { Email } from "../values-object/email.vo";
+import { UserEntity } from "../entities/user.entity";
+import { Email } from "../value-objects/email.vo";
 
 export interface AuthRepository {
     register(user: UserEntity): Promise<UserEntity>;
@@ -7,3 +7,5 @@ export interface AuthRepository {
     findById(id: string): Promise<UserEntity>;
     findByEmail(email: Email): Promise<UserEntity | null>;
 }
+
+export const authRepositoryName = 'AuthRepository';

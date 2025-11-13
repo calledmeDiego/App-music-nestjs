@@ -1,8 +1,8 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/shared/infrastructure/prisma/services/prisma.service';
+import { Injectable } from '@nestjs/common';
+
 import { AuthRepository } from '../../domain/repository/auth.repository';
-import { UserEntity } from '../../domain/entity/user.entity';
-import { Email } from '../../domain/values-object/email.vo';
+import { UserEntity } from '../../domain/entities/user.entity';
+import { Email } from '../../domain/value-objects/email.vo';
 import { UserRepresentation } from 'src/auth/application/representation/user.representation';
 import { MongoPrismaService } from 'src/shared/infrastructure/prisma/services/mongo-prisma.service';
 

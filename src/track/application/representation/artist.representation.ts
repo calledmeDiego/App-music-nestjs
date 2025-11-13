@@ -1,4 +1,4 @@
-import { Artist } from "src/track/domain/value-object/artist.vo"
+import { Artist } from "src/track/domain/value-objects/artist.vo"
 
 export class ArtistRepresentation {
     private constructor(private readonly artist: Artist) { }
@@ -11,7 +11,7 @@ export class ArtistRepresentation {
         const artist = this.artist
 
         return {
-            name : artist.name,
+            name: artist.name,
             nickname: artist.nickname,
             nationality: artist.nationality,
         }

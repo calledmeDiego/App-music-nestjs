@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/shared/infrastructure/prisma/services/prisma.service';
 import { SqlServerPrismaService } from 'src/shared/infrastructure/prisma/services/sqlserver-prisma.service';
 import { StorageRepresentation } from 'src/storage/application/representation/storage.representation';
-import { StoragesRepresentation } from 'src/storage/application/representation/storages.representation';
+
 import { StorageEntity } from 'src/storage/domain/entities/storage.entity';
 import { StorageRepository } from 'src/storage/domain/repository/storage.repository';
 

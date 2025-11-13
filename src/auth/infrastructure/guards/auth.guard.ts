@@ -1,12 +1,12 @@
 import { CanActivate, ExecutionContext, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 
-import type { JwtToken } from 'src/auth/domain/repository/jwt-token-repository';
+import { jwtRepositoryName, type JwtToken } from 'src/auth/domain/repository/jwt-token-repository';
 
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
-    @Inject('JwtToken') private readonly jwt: JwtToken, // 👈 inyección aquí
+    @Inject(jwtRepositoryName) private readonly jwt: JwtToken
   ) { }
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest();
