@@ -4,7 +4,7 @@ import { Email } from "src/auth/domain/value-objects/email.vo";
 export class UserRepresentation {
     private constructor(private readonly user: UserEntity) { }
 
-    public static fromUser(user): UserRepresentation {
+    public static fromUser(user:UserEntity): UserRepresentation {
         return new this(user)
     }
 

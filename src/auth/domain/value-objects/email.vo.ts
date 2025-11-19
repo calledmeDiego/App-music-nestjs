@@ -1,18 +1,16 @@
 export class Email {
+    readonly value: string;
     
-    constructor(private readonly value: string){}
+    constructor(value: string){
+        this.value = value;
+    }
 
-    static create(value: string): Email {
+    static fromString(value: string): Email {
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!regex.test(value)) {
             throw new Error('Invalid email format');
         }
-
         return new Email(value);
-    }
-
-    getValue(): string {
-        return this.value;
     }
 
     equals(other: Email) {

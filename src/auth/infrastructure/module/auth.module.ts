@@ -14,12 +14,12 @@ import { passwordEncrypterRepositoryName } from 'src/auth/domain/repository/pass
 import { jwtRepositoryName } from 'src/auth/domain/repository/jwt-token-repository';
 import { UserRegistrationDomainService } from 'src/auth/domain/services/user-registration.domain-service';
 import { UserLoginDomainService } from 'src/auth/domain/services/user-login.domain-service';
+import { UserEventsHandler } from '../subscriber/user-events.handler';
 
 @Module({
   imports: [],
   controllers: [AuthController],
-  providers: [AuthService, UserRegistrationDomainService,
-    UserLoginDomainService,
+  providers: [AuthService,UserEventsHandler,
     {
       provide: authRepositoryName,
       useFactory: (dbInstance: any, envService: EnvService) => {

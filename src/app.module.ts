@@ -10,6 +10,9 @@ import { SlackLoggerService } from './shared/infrastructure/logging/slack-logger
 import { EnvService } from './shared/infrastructure/config/env.service';
 import { MongoPrismaService } from './shared/infrastructure/prisma/services/mongo-prisma.service';
 import { SqlServerPrismaService } from './shared/infrastructure/prisma/services/sqlserver-prisma.service';
+import { EventEmitter2, EventEmitterModule } from '@nestjs/event-emitter';
+import { eventBusDefinition } from './shared/domain/events/event-bus';
+import { EventEmitterService } from './shared/infrastructure/services/event-emitter.service';
 
 
 @Global()
@@ -18,6 +21,8 @@ import { SqlServerPrismaService } from './shared/infrastructure/prisma/services/
     ConfigModule.forRoot({
       isGlobal: true
     }),
+    EventEmitterModule.forRoot(),
+    EventEmitter2,
     AuthModule,
     TrackModule,
     StorageModule
@@ -25,7 +30,7 @@ import { SqlServerPrismaService } from './shared/infrastructure/prisma/services/
 
   ],
   controllers: [],
-  providers: [ SlackLoggerService, EnvService,
+  providers: [ SlackLoggerService, EnvService ,
     {
       provide: 'DATABASE_INSTANCE',
       // Usamos useFactory para la lógica de decisión, pero solo dentro de este módulo
@@ -48,9 +53,13 @@ import { SqlServerPrismaService } from './shared/infrastructure/prisma/services/
         return globalThis['dbInstance'];
       },
       inject: [EnvService],
+    },
+    {
+      provide: eventBusDefinition.name,
+      useClass: EventEmitterService
     }
   ],
 
-  exports: [SlackLoggerService, EnvService, 'DATABASE_INSTANCE']
+  exports: [SlackLoggerService, EnvService, 'DATABASE_INSTANCE',eventBusDefinition.name]
 })
 export class AppModule { }

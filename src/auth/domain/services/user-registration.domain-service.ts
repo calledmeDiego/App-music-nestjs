@@ -7,6 +7,7 @@ import { UserEntity } from "../entities/user.entity";
 import { Inject, Injectable } from "@nestjs/common";
 import { UserRegisteredEvent } from "../events/user-registered.event";
 import { EventBus } from "src/shared/domain/events/event-bus";
+import { Role } from "../value-objects/role.vo";
 
 @Injectable()
 export class UserRegistrationDomainService {
@@ -14,27 +15,26 @@ export class UserRegistrationDomainService {
 
     constructor(
         @Inject(authRepositoryName) private readonly authRepository: AuthRepository,
-        @Inject(passwordEncrypterRepositoryName) private readonly passwordEncrypter: PasswordEncrypter,
-        private readonly eventBus: EventBus) {
+        @Inject(passwordEncrypterRepositoryName) private readonly passwordEncrypter: PasswordEncrypter) {
     }
 
     async register(name: string, email: string, password: string, role: 'user' | 'admin' = 'user') {
-        const emailVO = Email.create(email);
+        const emailVO = Email.fromString(email);
         const userExists = await this.authRepository.findByEmail(emailVO);
 
         if (userExists) throw new EmailAlreadyRegisteredException();
 
         const hashed = await this.passwordEncrypter.encrypt(password);
 
-        const newUser = UserEntity.CreateRegisterForm({
+        const newUser = UserEntity.create({
             name,
             email: emailVO,
             password: hashed,
-            role
+            role: Role.fromString(role as string)
         });
 
         const savedUser = await this.authRepository.register(newUser);
-        await this.eventBus.publish(new UserRegisteredEvent(savedUser.id, savedUser.email.getValue()))
+        console.log(savedUser);
         
         return savedUser;
     }

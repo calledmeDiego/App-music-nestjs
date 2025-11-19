@@ -13,7 +13,22 @@ export class SlackLoggerService {
     async sendMessage(message: string) {
         try {
             await this.webHook.send({ text: message });
-        } catch (err) {
+        } catch (err: any) {
+            // El dominio ya no existe
+            if (err.original?.code === "ENOTFOUND") {
+                console.warn('Slack Webhook inválido o expirado')
+                return;
+            }
+            // Slack revocó el webhook
+            if (err.original?.response?.status === 410) {
+                console.warn("Slack webhook revocado.");
+                return;
+            }
+            // URL incorrecta o borrada (404 Not Found)
+            if (err.original?.response?.status === 404) {
+                console.warn("Slack webhook no encontrado (404).");
+                return;
+            }
             console.error('Error enviado a slack: ', err);
         }
     }
