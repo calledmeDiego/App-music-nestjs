@@ -10,7 +10,6 @@ export class StorageSqlserverRepository implements StorageRepository {
 
   constructor(private readonly prismaService: SqlServerPrismaService) { }
 
-
   async create(storage: StorageEntity): Promise<StorageEntity> {
     const storageCreated = await this.prismaService.storages.create({
       data: {
@@ -18,20 +17,20 @@ export class StorageSqlserverRepository implements StorageRepository {
         url: storage.url
       }
     });
-    const storageResponse = StorageEntity.toParse(storageCreated);
+    const storageResponse = StorageEntity.FromDbToEntityParse(storageCreated);
 
     return storageResponse;
   }
 
-  async findById(id: string): Promise<StorageEntity|null> {
+  async findById(id: string): Promise<StorageEntity | null> {
     const storageFound = await this.prismaService.storages.findUnique({
       where: {
         id
       }
     });
-    if(!storageFound) return null;
+    if (!storageFound) return null;
 
-    const storage = StorageEntity.toParse(storageFound);
+    const storage = StorageEntity.FromDbToEntityParse(storageFound);
     return storage;
   }
 
@@ -39,7 +38,7 @@ export class StorageSqlserverRepository implements StorageRepository {
   async listAll(): Promise<StorageEntity[]> {
     const allStorages = await this.prismaService.storages.findMany();
 
-    const storages = allStorages.map((s) => StorageEntity.toParse(s));
+    const storages = allStorages.map((s) => StorageEntity.FromDbToEntityParse(s));
     return storages;
   }
 
@@ -51,13 +50,13 @@ export class StorageSqlserverRepository implements StorageRepository {
         }
       }
     });
-    const storages = allStorages.map((s) => StorageEntity.toParse(s));
+    const storages = allStorages.map((s) => StorageEntity.FromDbToEntityParse(s));
 
     return storages;
 
   }
 
-  async update(id: string, storage: StorageEntity): Promise<any> {
+  async update(id: string, storage: StorageEntity): Promise<StorageEntity> {
 
     const updateStorage = await this.prismaService.storages.update({
       where: { id },
@@ -66,18 +65,19 @@ export class StorageSqlserverRepository implements StorageRepository {
         filename: storage.filename,
       }
     });
+    const storageUpd = StorageEntity.FromDbToEntityParse(updateStorage)
 
-    return StorageRepresentation.fromStorage(updateStorage).format();
+    return storageUpd;
 
   }
 
   async delete(id: string) {
-  
+
     let deletedStorage = await this.prismaService.storages.delete({
       where: { id }
     });
 
-    deletedStorage = StorageEntity.toParse(deletedStorage);
+    deletedStorage = StorageEntity.FromDbToEntityParse(deletedStorage);
 
     return deletedStorage;
 

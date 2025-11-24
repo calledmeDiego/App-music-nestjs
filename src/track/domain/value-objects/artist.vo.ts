@@ -1,7 +1,15 @@
 export class Artist {
-    constructor(public readonly name?: string, public readonly nickname?: string, public readonly nationality?: string){}
+    readonly name: string;
+    readonly nickname: string;
+    readonly nationality: string;
+    
+    constructor(name?: string,nickname?: string, nationality?: string){
+        this.name = name ? name : '';
+        this.nickname = nickname ? nickname : '';
+        this.nationality = nationality ? nationality : '';
+    }
 
-    static create(props: {name?: string, nickname?: string, nationality?: string}){
-        return new Artist(props.name , props.nickname , props.nationality);
-    }    
+    static create({name,nickname,nationality}: {name?: string, nickname?: string, nationality?: string}){
+        return new Artist(name , nickname , nationality);
+    } 
 }

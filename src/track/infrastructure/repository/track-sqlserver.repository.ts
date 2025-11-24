@@ -11,7 +11,7 @@ export class TrackSqlServerRepository implements TrackRepository {
     async create(track: TrackEntity): Promise<TrackEntity> {
         let artistId: string | undefined;
         let durationId: string | undefined;
-
+        
         if (track.artist) {
             const artistIdGenerated = await this.findOrCreateorUpdateArtist({
                 name: track.artist.name!,
@@ -23,12 +23,11 @@ export class TrackSqlServerRepository implements TrackRepository {
 
         if (track.duration) {
             const durationGenerated = await this.createDuration({
-                start: track.duration.start!,
-                end: track.duration.end!,
+                start: Number(track.duration.start!),
+                end: Number(track.duration.end!),
             })
             durationId = durationGenerated;
         }
-
 
         const createdTrack = await this.prismaService.tracks.create({
             data: {
@@ -47,9 +46,7 @@ export class TrackSqlServerRepository implements TrackRepository {
 
         });
 
-        return TrackEntity.toParse(createdTrack);
-
-
+        return TrackEntity.FromDbToEntityParse(createdTrack);
     }
 
     async findById(id: string): Promise<TrackEntity | null> {
@@ -62,9 +59,9 @@ export class TrackSqlServerRepository implements TrackRepository {
                 duration: true,
             }
         })
-        if(!foundTrack) return null;
+        if (!foundTrack) return null;
 
-        return TrackEntity.toParse(foundTrack);
+        return TrackEntity.FromDbToEntityParse(foundTrack);
 
     }
 
@@ -79,17 +76,17 @@ export class TrackSqlServerRepository implements TrackRepository {
         });
 
         return allTracks.map((t) => {
-            return TrackEntity.toParse(t)            
+            return TrackEntity.FromDbToEntityParse(t)
         });
     }
 
     async update(id: string, track: TrackEntity): Promise<TrackEntity> {
+
         const artistId = await this.findOrCreateorUpdateArtist({
             name: <string>track.artist?.name,
             nickname: <string>track.artist?.nickname,
             nationality: <string>track.artist?.nationality,
         });
-
         const updatedTrack = await this.prismaService.tracks.update({
             where: { id },
             data: {
@@ -101,15 +98,14 @@ export class TrackSqlServerRepository implements TrackRepository {
                     connect: { id: artistId }
                 },
                 duration: track.duration ? {
-
                     update: {
-                        start: track.duration.start,
-                        end: track.duration.end
+                        start: Number(track.duration.start!),
+                        end: Number(track.duration.end!)
                     },
                 } : undefined,
-                media: {
-                    connect: { id: <string>track.mediaId }
-                },
+                media: track.mediaId ? {
+                    connect: { id: track.mediaId }
+                }: undefined,
                 deletedAt: track.deletedAt
             },
             include: {
@@ -118,8 +114,7 @@ export class TrackSqlServerRepository implements TrackRepository {
             }
         });
 
-
-        return TrackEntity.toParse(updatedTrack);
+        return TrackEntity.FromDbToEntityParse(updatedTrack);
     }
 
     async softDelete(id: string): Promise<any> {
@@ -129,7 +124,7 @@ export class TrackSqlServerRepository implements TrackRepository {
             data: { deletedAt: new Date() }
         });
 
-        return TrackEntity.toParse(deletedTrack)
+        return 
     }
 
     async findOrCreateorUpdateArtist(artist: {

@@ -18,7 +18,7 @@ export class StorageMongoRepository implements StorageRepository {
       }
     });
 
-    const storageResponse = StorageEntity.toParse(storageCreated);
+    const storageResponse = StorageEntity.FromDbToEntityParse(storageCreated);
 
     return storageResponse;
   }
@@ -31,7 +31,7 @@ export class StorageMongoRepository implements StorageRepository {
     });
     if(!storageFound) return null;
  
-    const storage = StorageEntity.toParse(storageFound);
+    const storage = StorageEntity.FromDbToEntityParse(storageFound);
     return storage;
   }
 
@@ -39,7 +39,7 @@ export class StorageMongoRepository implements StorageRepository {
   async listAll(): Promise<StorageEntity[]> {
     const allStorages = await this.prismaService.storages.findMany();
 
-    const storages = allStorages.map((s) => StorageEntity.toParse(s));
+    const storages = allStorages.map((s) => StorageEntity.FromDbToEntityParse(s));
     return storages;
   }
 
@@ -52,12 +52,12 @@ export class StorageMongoRepository implements StorageRepository {
       }
     });
 
-    const storages = allStorages.map((s) => StorageEntity.toParse(s));
+    const storages = allStorages.map((s) => StorageEntity.FromDbToEntityParse(s));
 
     return storages;
   }
 
-  async update(id: string, storage: StorageEntity): Promise<any> {
+  async update(id: string, storage: StorageEntity): Promise<StorageEntity> {
 
     const updateStorage = await this.prismaService.storages.update({
       where: { id },
@@ -67,7 +67,9 @@ export class StorageMongoRepository implements StorageRepository {
       }
     });
 
-    return StorageRepresentation.fromStorage(updateStorage).format();
+    const storageUpd = StorageEntity.FromDbToEntityParse(updateStorage)
+
+    return storageUpd;
   }
 
   async delete(id: string) {
@@ -76,7 +78,7 @@ export class StorageMongoRepository implements StorageRepository {
       where: { id }
     });
 
-    deletedStorage = StorageEntity.toParse(deletedStorage);
+    deletedStorage = StorageEntity.FromDbToEntityParse(deletedStorage);
 
     return deletedStorage;
 

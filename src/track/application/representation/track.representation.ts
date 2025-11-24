@@ -7,9 +7,9 @@ import { DurationRepresentation } from "./duration.representation";
 
 
 export class TrackRepresentation {
-    private constructor(private readonly track: TrackEntity, private readonly storage: StorageEntity) { }
+    private constructor(private readonly track: TrackEntity, private readonly storage?: StorageEntity | null) { }
 
-    public static fromTrack(track, storage): TrackRepresentation {
+    public static fromTrack(track: TrackEntity, storage?: StorageEntity | null): TrackRepresentation {
         return new this(track,storage)
     }
 

@@ -8,11 +8,12 @@ import { EnvService } from 'src/shared/infrastructure/config/env.service';
 
 
 import { AuthModule } from 'src/auth/infrastructure/module/auth.module';
+import { StorageEventHandler } from '../subscriber/storage-event.handler';
 
 @Module({
   imports: [ AuthModule],
   controllers: [StorageController],
-  providers: [StorageService,
+  providers: [StorageService,StorageEventHandler,
     {
       provide: 'StorageRepository',
       useFactory: (dbInstance: any, envService: EnvService) => {

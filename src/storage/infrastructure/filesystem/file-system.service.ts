@@ -9,6 +9,6 @@ export class FileSystemService implements FileSystemPort {
 
   async deleteFile(filename: string): Promise<void> {
     const filePath = path.join(this.storagePath, filename);
-    await fs.promises.unlink(filePath);
+    await fs.promises.unlink(filePath).catch(() => {});
   }
 }

@@ -5,8 +5,6 @@ import { AggregateRoot } from "src/shared/domain/events/aggregate-root";
 import { Role } from "../value-objects/role.vo";
 
 export class UserEntity extends AggregateRoot {
-
-
     private constructor(
         public readonly id: string,
         public readonly email: Email,

@@ -8,10 +8,7 @@ import { LoginUserDTO } from '../dto/login-user.dto';
 import { EmailAlreadyRegisteredException, UserNotFoundError, InvalidPasswordError } from 'src/auth/domain/exception';
 import { passwordEncrypterRepositoryName, type PasswordEncrypter } from 'src/auth/domain/repository/password-encrypter.repository';
 import { jwtRepositoryName, type JwtToken } from 'src/auth/domain/repository/jwt-token-repository';
-
 import { UserRepresentation } from '../representation/user.representation';
-import { UserRegistrationDomainService } from 'src/auth/domain/services/user-registration.domain-service';
-import { UserLoginDomainService } from 'src/auth/domain/services/user-login.domain-service';
 import { eventBusDefinition, type EventBus } from 'src/shared/domain/events/event-bus';
 import { Role } from 'src/auth/domain/value-objects/role.vo';
 import { UserLoguedEvent } from 'src/auth/domain/events/user-logued.event';

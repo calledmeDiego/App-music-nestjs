@@ -11,22 +11,27 @@ import type { StorageRepository } from 'src/storage/domain/repository/storage.re
 import { TrackRepresentation } from '../representation/track.representation';
 import { StoragesRepresentation } from 'src/storage/application/representation/storages.representation';
 import { TracksRepresentation } from '../representation/tracks.representation';
+import { type EventBus, eventBusDefinition } from 'src/shared/domain/events/event-bus';
+import { TrackUpdatedEvent } from 'src/track/domain/events/track-updated.event';
+import { TrackDeletedEvent } from 'src/track/domain/events/track-deleted.event';
 
 
 @Injectable()
 export class TrackService {
-  constructor(@Inject('TrackRepository') private readonly trackRepository: TrackRepository, @Inject('StorageRepository') private readonly storageRepository: StorageRepository) { }
+  constructor(
+    @Inject('TrackRepository') private readonly trackRepository: TrackRepository,
+    @Inject('StorageRepository') private readonly storageRepository: StorageRepository,
+    @Inject(eventBusDefinition.name) private readonly eventBus: EventBus) { }
 
   async createTrack(data: CreateTrackDTO) {
     const artist = data.artist ? Artist.create(data.artist) : null;
 
     if (!artist) throw new ArtistNullException();
 
-    const duration = data.duration ? Duration.create(data.duration.start, data.duration.end) : null;
-
+    const duration = data.duration ? Duration.create(data.duration) : null;
     if (!duration) throw new DurationNullException();
 
-    let trackCreated = TrackEntity.CreateForm({
+    let trackCreated = TrackEntity.create({
       name: data.name,
       album: data.album,
       cover: data.cover,
@@ -38,9 +43,11 @@ export class TrackService {
 
     const storage = await this.storageRepository.findById(data.mediaId);
 
+    this.eventBus.publish(trackCreated.pullEvents());
+
     trackCreated = await this.trackRepository.create(trackCreated);
 
-    return TrackRepresentation.fromTrack(trackCreated, storage).format();
+    return TrackRepresentation.fromTrack(trackCreated, storage!).format();
   }
 
   async getTrack(id: string) {
@@ -50,7 +57,7 @@ export class TrackService {
 
     const storage = await this.storageRepository.findById(track.mediaId!);
 
-    const trackRepresentation = TrackRepresentation.fromTrack(track, storage).format();
+    const trackRepresentation = TrackRepresentation.fromTrack(track, storage!).format();
     return trackRepresentation;
   }
 
@@ -78,23 +85,26 @@ export class TrackService {
 
       if (!artist) throw new ArtistNullException();
 
-      const duration = data.duration ? Duration.create(data.duration.start, data.duration.end) : null;
+      const duration = data.duration ? Duration.create(data.duration) : null;
 
       if (!duration) throw new DurationNullException();
 
       const storage = await this.storageRepository.findById(data.mediaId);
 
-      const track = TrackEntity.CreateForm({
+      const track = TrackEntity.create({
         name: data.name,
         album: data.album,
         cover: data.cover,
         artist,
         duration,
-        mediaId: data.mediaId
+        mediaId: storage?.id
       });
 
       const updatedTrack = await this.trackRepository.update(id, track);
 
+      updatedTrack.record(new TrackUpdatedEvent(updatedTrack));
+
+      this.eventBus.publish(updatedTrack.pullEvents());
       return TrackRepresentation.fromTrack(updatedTrack, storage).format()
 
     } catch (error) {
@@ -109,7 +119,9 @@ export class TrackService {
     if (!existingTrack) {
       throw new TrackNotFoundException();
     }
+    existingTrack.record(new TrackDeletedEvent(existingTrack));
 
+    this.eventBus.publish(existingTrack.pullEvents());
     await this.trackRepository.softDelete(id);
 
     return {

@@ -6,7 +6,7 @@ import { StorageRepresentation } from "./storage.representation";
 export class StoragesRepresentation {
     private constructor(private readonly storages: StorageEntity[]) { }
 
-    public static fromStorages(storages: any[]): StoragesRepresentation {
+    public static fromStorages(storages: StorageEntity[]): StoragesRepresentation {
         return new this(storages)
     }
 

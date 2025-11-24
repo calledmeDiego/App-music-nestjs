@@ -8,11 +8,12 @@ import { TrackSqlServerRepository } from '../repository/track-sqlserver.reposito
 import { StorageModule } from 'src/storage/infrastructure/module/storage.module';
 
 import { EnvService } from 'src/shared/infrastructure/config/env.service';
+import { TrackEventHandler } from '../subscriber/track-event.handler';
 
 @Module({
   controllers: [TrackController],
   imports: [AuthModule, StorageModule],
-  providers: [TrackService,
+  providers: [TrackService,TrackEventHandler,
     {
       provide: 'TrackRepository',
       useFactory: (dbInstance: any, envService: EnvService) => {

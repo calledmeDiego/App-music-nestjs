@@ -9,6 +9,8 @@ import { StorageNotFoundException } from 'src/storage/domain/exception/storage-n
 import { StorageRepresentation } from '../representation/storage.representation';
 import { StoragesRepresentation } from '../representation/storages.representation';
 import { EnvService } from 'src/shared/infrastructure/config/env.service';
+import { type EventBus, eventBusDefinition } from 'src/shared/domain/events/event-bus';
+import { StorageDeletedEvent } from 'src/storage/domain/events/storage-deleted.event';
 
 @Injectable()
 export class StorageService {
@@ -16,11 +18,11 @@ export class StorageService {
   constructor(
     @Inject('StorageRepository') private readonly storageRepository: StorageRepository, @Inject('FileSystemPort') private readonly fileSystem: FileSystemPort,
     private readonly envService: EnvService,
+    @Inject(eventBusDefinition.name) private readonly eventBus: EventBus
   ) { }
 
   //dto create en el parametro
   async createStorage(file: Express.Multer.File) {
-
      const PUBLIC_URL = this.envService.publicUrl;
     
     const fileData = {
@@ -28,14 +30,15 @@ export class StorageService {
       filename: file.filename
     };
 
-    const storage = StorageEntity.CreateFormStorage({ url: fileData.url, filename: fileData.filename });
+    const storage = StorageEntity.create({ url: fileData.url, filename: fileData.filename });
 
     const storageCreated = await this.storageRepository.create(storage);
+
+    this.eventBus.publish(storage.pullEvents())
     return StorageRepresentation.fromStorage(storageCreated).format();
   }
 
   async findAllStorages() {
-
     const allStorages = await this.storageRepository.listAll();
 
     const storages = StoragesRepresentation.fromStorages(allStorages).format();
@@ -58,9 +61,11 @@ export class StorageService {
       throw new StorageNotFoundException();
     }
 
-    const updatedStorage = StorageEntity.CreateFormStorage({ url: updateData.url, filename: updateData.filename })
+    const updatedStorage = StorageEntity.create({ url: updateData.url, filename: updateData.filename })
 
-    return await this.storageRepository.update(idDTO.id, updatedStorage);
+    const storage = await this.storageRepository.update(idDTO.id, updatedStorage);
+
+    return StorageRepresentation.fromStorage(storage).format();
   }
 
   async removeStorage(id: string) {
@@ -71,6 +76,9 @@ export class StorageService {
     await this.fileSystem.deleteFile(storage.filename);
 
     const deletedStorage = await this.storageRepository.delete(id);
+    storage.record(new StorageDeletedEvent(storage))
+    this.eventBus.publish(storage.pullEvents());
+
     return {
       ...StorageRepresentation.fromStorage(deletedStorage).format(),
       deleted: true

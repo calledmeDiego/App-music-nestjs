@@ -1,11 +1,12 @@
 export class Duration {
-    /**
-     *
-     */
-    constructor(public readonly start:number | null, public readonly end: number | null) {       
+    readonly start: string;
+    readonly end: string
+    constructor(start:number | null,end: number | null) {  
+        this.start = start ? start.toString(): '0';
+        this.end = end ? end.toString(): '';
     }
 
-    static create(start?: number, end?: number) {
+    static create({start,end}:{start?: number, end?: number}) {
         if (start && end && start > end) {
             throw new Error('Duration start cannot be greater than end');
         }
@@ -15,7 +16,7 @@ export class Duration {
 
     get total(): number | null {
         if (this.start !== null && this.end !== null) {
-            return this.end - this.start;
+            return Number(this.end) - Number(this.start);
         }
 
         return null;

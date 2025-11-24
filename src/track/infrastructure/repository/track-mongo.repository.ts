@@ -19,13 +19,16 @@ export class TrackMongoRepository implements TrackRepository {
         album: track.album,
         cover: track.cover,
         artist: track.artist,
-        duration: track.duration,
+        duration: {
+          start: Number(track.duration?.start),
+          end: Number(track.duration?.end)
+        },
         mediaId: track.mediaId,
         deletedAt: null
       }
     });
 
-    return TrackEntity.toParse(createdTrack);
+    return TrackEntity.FromDbToEntityParse(createdTrack);
   }
 
   async findById(id: string): Promise<TrackEntity | null> {
@@ -37,7 +40,7 @@ export class TrackMongoRepository implements TrackRepository {
 
     if (!foundTrack) return null;
 
-    return TrackEntity.toParse(foundTrack);
+    return TrackEntity.FromDbToEntityParse(foundTrack);
 
   }
 
@@ -47,7 +50,7 @@ export class TrackMongoRepository implements TrackRepository {
     });
 
     const tracks = allTracks.map((t) => {
-      return TrackEntity.toParse(t);
+      return TrackEntity.FromDbToEntityParse(t);
     });
 
     return tracks;
@@ -62,13 +65,15 @@ export class TrackMongoRepository implements TrackRepository {
         album: track.album,
         cover: track.cover,
         artist: track.artist,
-        duration: track.duration,
+        duration: {
+          start: Number(track.duration?.start),
+          end: Number(track.duration?.end)
+        },
         mediaId: track.mediaId,
         deletedAt: track.deletedAt
       }
     });
-
-    return TrackEntity.toParse(updatedTrack)
+    return TrackEntity.FromDbToEntityParse(updatedTrack)
 
   }
 
