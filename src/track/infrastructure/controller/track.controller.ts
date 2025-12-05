@@ -7,6 +7,7 @@ import { RolesGuard } from 'src/auth/infrastructure/guards/roles.guard';
 import { Roles } from 'src/auth/infrastructure/decorators/roles.decorator';
 import type { Response } from 'express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { UpdateTrackDTO } from 'src/track/application/dto/update-track.dto';
 
 @ApiTags('Tracks - Endpoints de pistas de música')
 @Controller('tracks')
@@ -209,6 +210,12 @@ export class TrackController {
   async remove(@Param() paramId: GetIdDTO, @Res() res: Response) {
     const deletedTrack = await this.trackService.deleteTrack(paramId.id);
     return res.status(HttpStatus.OK).json(deletedTrack);
+  }
+
+  @Patch('/:id')
+  async patchTrack(@Param() paramId: GetIdDTO, @Body() body: UpdateTrackDTO, @Res() res: Response) {
+    const patchedTrack = await this.trackService.updatePartialTrack(paramId.id, body);
+    return res.status(HttpStatus.OK).json(patchedTrack);
   }
 
 

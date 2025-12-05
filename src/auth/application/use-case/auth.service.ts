@@ -43,7 +43,7 @@ export class AuthService {
   }
 
   async loginUser(data: LoginUserDTO) {
-
+    console.log(`LLegue a auth service`)
     const emailVO = Email.fromString(data.email);
 
     const userFounded = await this.authRepository.findByEmail(emailVO);
@@ -54,10 +54,15 @@ export class AuthService {
     if (!isValid) throw new InvalidPasswordError();
     const token = this.jwtService.sign({ id: userFounded.id, role: userFounded.role.value });
 
+
+
     const dataUser = {
       token: token,
       user: UserRepresentation.fromUser(userFounded).format()
     };
+
+    console.log(`${dataUser}`)
+
 
     userFounded.record(new UserLoguedEvent(userFounded))
     this.eventBus.publish(userFounded.pullEvents())

@@ -5,6 +5,6 @@ export class UploadedFileError extends DomainError {
     public httpStatus = HttpStatus.BAD_REQUEST;
 
     constructor() {
-        super('El acrhivo es requerido, no subío ningún archivo');
+        super('El archivo es requerido, no subío ningún archivo');
     }
 }

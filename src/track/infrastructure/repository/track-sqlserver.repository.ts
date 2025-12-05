@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { Uuid } from "src/shared/domain/value-object/Uuid.vo";
 
 import { SqlServerPrismaService } from "src/shared/infrastructure/prisma/services/sqlserver-prisma.service";
 import { TrackEntity } from "src/track/domain/entities/track.entity";
@@ -11,9 +12,9 @@ export class TrackSqlServerRepository implements TrackRepository {
     async create(track: TrackEntity): Promise<TrackEntity> {
         let artistId: string | undefined;
         let durationId: string | undefined;
-        
+
         if (track.artist) {
-            const artistIdGenerated = await this.findOrCreateorUpdateArtist({
+            const artistIdGenerated = await this.createorUpdateArtist({
                 name: track.artist.name!,
                 nickname: track.artist.nickname!,
                 nationality: track.artist.nationality!,
@@ -36,7 +37,7 @@ export class TrackSqlServerRepository implements TrackRepository {
                 cover: track.cover,
                 artistId,
                 durationId,
-                mediaId: track.mediaId || null,
+                mediaId: track.mediaId?.value,
                 deletedAt: null
             },
             include: {
@@ -49,10 +50,10 @@ export class TrackSqlServerRepository implements TrackRepository {
         return TrackEntity.FromDbToEntityParse(createdTrack);
     }
 
-    async findById(id: string): Promise<TrackEntity | null> {
+    async findById(id: Uuid): Promise<TrackEntity | null> {
         const foundTrack = await this.prismaService.tracks.findUnique({
             where: {
-                id
+                id: id.value
             },
             include: {
                 artist: true,
@@ -80,20 +81,20 @@ export class TrackSqlServerRepository implements TrackRepository {
         });
     }
 
-    async update(id: string, track: TrackEntity): Promise<TrackEntity> {
-
-        const artistId = await this.findOrCreateorUpdateArtist({
+    async update(id: Uuid, track: TrackEntity): Promise<TrackEntity> {
+        const artistId = await this.createorUpdateArtist({
             name: <string>track.artist?.name,
             nickname: <string>track.artist?.nickname,
             nationality: <string>track.artist?.nationality,
-        });
+        });        
+
         const updatedTrack = await this.prismaService.tracks.update({
-            where: { id },
+            where: { id: id.value },
             data: {
                 name: track.name,
                 album: track.album,
                 cover: track.cover,
-
+                updatedAt: new Date(),
                 artist: {
                     connect: { id: artistId }
                 },
@@ -103,31 +104,29 @@ export class TrackSqlServerRepository implements TrackRepository {
                         end: Number(track.duration.end!)
                     },
                 } : undefined,
-                media: track.mediaId ? {
-                    connect: { id: track.mediaId }
-                }: undefined,
-                deletedAt: track.deletedAt
+                media: track.mediaId ? { 
+                    connect: { id: track.mediaId.value}
+                } : undefined,
             },
             include: {
                 artist: true,
                 duration: true
             }
         });
-
         return TrackEntity.FromDbToEntityParse(updatedTrack);
     }
 
-    async softDelete(id: string): Promise<any> {
+    async softDelete(id: Uuid): Promise<any> {
 
         const deletedTrack = await this.prismaService.tracks.update({
-            where: { id },
+            where: { id: id.value },
             data: { deletedAt: new Date() }
         });
 
-        return 
+        return
     }
 
-    async findOrCreateorUpdateArtist(artist: {
+    async createorUpdateArtist(artist: {
         name: string,
         nickname: string,
         nationality: string

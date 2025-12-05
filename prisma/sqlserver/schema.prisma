@@ -7,9 +7,10 @@ datasource db {
   provider = "sqlserver"
   url      = env("SQLSERVER_URL")
 }
+//   id        String   @id @default(uuid()) @db.
 
 model Users {
-  id        String   @id @default(uuid()) @db.UniqueIdentifier
+  id        String   @id @db.UniqueIdentifier
   email     String   @unique
   name      String?
   password  String
@@ -27,7 +28,7 @@ model Storages {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tracks    Tracks?
+  tracks    Tracks[]
 }
 
 model Artist {
@@ -59,11 +60,10 @@ model Tracks {
   duration   Duration? @relation(fields: [durationId], references: [id])
   durationId String?   @unique @db.UniqueIdentifier
 
-  mediaId    String?   @unique @db.UniqueIdentifier
+  mediaId    String?   @db.UniqueIdentifier
   media      Storages? @relation(fields: [mediaId], references: [id])
 
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
   deletedAt  DateTime?
 }
-

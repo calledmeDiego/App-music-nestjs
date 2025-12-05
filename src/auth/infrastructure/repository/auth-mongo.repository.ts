@@ -20,13 +20,13 @@ export class AuthMongoRepository implements AuthRepository {
   async register(user: UserEntity): Promise<UserEntity> {
     const createdUser = await this.prisma.users.create({
       data: {
+        id: <string>user.id,
         email: user.email.value,
         name: user.name,
         password: user.password,
         role: user.role.value as Role,
       },
     });
-
     return UserEntity.FromDbToEntityParse(createdUser);
   }
 

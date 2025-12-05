@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Uuid } from 'src/shared/domain/value-object/Uuid.vo';
 import { MongoPrismaService } from 'src/shared/infrastructure/prisma/services/mongo-prisma.service';
 import { StorageRepresentation } from 'src/storage/application/representation/storage.representation';
 
@@ -13,6 +14,7 @@ export class StorageMongoRepository implements StorageRepository {
   async create(storage: StorageEntity): Promise<StorageEntity> {
     const storageCreated = await this.prismaService.storages.create({
       data: {
+        id: storage.id.value,
         filename: storage.filename,
         url: storage.url
       }
@@ -23,10 +25,10 @@ export class StorageMongoRepository implements StorageRepository {
     return storageResponse;
   }
 
-  async findById(id: string): Promise<StorageEntity|null> {
+  async findById(id: Uuid): Promise<StorageEntity|null> {
     const storageFound = await this.prismaService.storages.findUnique({
       where: {
-        id
+        id: id.value
       }
     });
     if(!storageFound) return null;
@@ -43,11 +45,12 @@ export class StorageMongoRepository implements StorageRepository {
     return storages;
   }
 
-  async findManyById(ids: string[]): Promise<StorageEntity[]> {
+  async findManyById(ids: Uuid[]): Promise<StorageEntity[]> {
+    const idStrings = ids.map(id => id.value)
     const allStorages = await this.prismaService.storages.findMany({
       where: {
         id: {
-          in: ids
+          in: idStrings
         }
       }
     });
@@ -57,10 +60,10 @@ export class StorageMongoRepository implements StorageRepository {
     return storages;
   }
 
-  async update(id: string, storage: StorageEntity): Promise<StorageEntity> {
+  async update(id: Uuid, storage: StorageEntity): Promise<StorageEntity> {
 
     const updateStorage = await this.prismaService.storages.update({
-      where: { id },
+      where: { id: id.value },
       data: {
         url: storage.url,
         filename: storage.filename,
@@ -72,15 +75,15 @@ export class StorageMongoRepository implements StorageRepository {
     return storageUpd;
   }
 
-  async delete(id: string) {
+  async delete(id: Uuid) {
 
-    let deletedStorage = await this.prismaService.storages.delete({
-      where: { id }
+    const deletedStorage = await this.prismaService.storages.delete({
+      where: { id: id.value }
     });
 
-    deletedStorage = StorageEntity.FromDbToEntityParse(deletedStorage);
+    const deletedStorageResponse = StorageEntity.FromDbToEntityParse(deletedStorage);
 
-    return deletedStorage;
+    return deletedStorageResponse;
 
   }
 }

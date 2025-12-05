@@ -1,10 +1,10 @@
 import { HttpStatus } from "@nestjs/common";
 import { DomainError } from "src/shared/domain/exception/domain-error.exception";
 
-export class StorageNotFoundException extends DomainError {
+export class IdStorageInvalidException extends DomainError {
     public httpStatus = HttpStatus.NOT_FOUND;
 
     constructor() {
-        super('No se encuentra al storage con ese Id');
+        super('El id que ingreso ');
     }
 }

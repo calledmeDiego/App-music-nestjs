@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import { IsMongoId, isNotEmpty, IsNotEmpty, IsNumber, IsString, IsUrl, Matches, ValidateNested } from "class-validator";
+import { IsNotEmpty, IsNumber, IsString, IsUrl, Matches, ValidateNested } from "class-validator";
 
 export class ArtistDTO {
     @ApiProperty({

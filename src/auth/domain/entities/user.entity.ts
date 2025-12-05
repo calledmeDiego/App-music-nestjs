@@ -3,10 +3,11 @@ import { Email } from "../value-objects/email.vo";
 import { UserRegisteredEvent } from "../events/user-registered.event";
 import { AggregateRoot } from "src/shared/domain/events/aggregate-root";
 import { Role } from "../value-objects/role.vo";
+import { Uuid } from "src/shared/domain/value-object/Uuid.vo";
 
 export class UserEntity extends AggregateRoot {
     private constructor(
-        public readonly id: string,
+        public readonly id: Uuid | string,
         public readonly email: Email,
         public readonly name: string | null,
         public readonly password: string,
@@ -37,7 +38,7 @@ export class UserEntity extends AggregateRoot {
     }) {
         const currentDate = new Date();
         const user = new this(
-            '',
+            Uuid.create(),
             data.email,
             data.name,
             data.password,

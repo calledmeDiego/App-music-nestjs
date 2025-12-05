@@ -16,7 +16,7 @@ export class TracksRepresentation {
 
     public format() {
         return this.tracks.map((t) => {
-            const mediaId = t.mediaId;
+            const mediaId = t.mediaId?.value;
             const storage = mediaId ? this.storageMap.get(mediaId) : undefined;
             return TrackRepresentation.fromTrack(t, storage).format();
         })

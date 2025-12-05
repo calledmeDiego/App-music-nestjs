@@ -1,9 +1,11 @@
 import { AggregateRoot } from "src/shared/domain/events/aggregate-root";
 import { StorageCreatedEvent } from "../events/storage-created.event";
+import { StorageDeletedEvent } from "../events/storage-deleted.event";
+import { Uuid } from "src/shared/domain/value-object/Uuid.vo";
 
 export class StorageEntity extends AggregateRoot {
     private constructor(
-        public readonly id: string,
+        public readonly id:  Uuid,
         public readonly url: string,
         public readonly filename: string,
         public readonly createdAt: Date,
@@ -18,7 +20,7 @@ export class StorageEntity extends AggregateRoot {
     }
     ) {
         return new this(
-            id,
+            Uuid.fromString(id),
             url,
             filename,
             createdAt, updatedAt
@@ -31,7 +33,7 @@ export class StorageEntity extends AggregateRoot {
     }) {
         const currentDate = new Date();
         const storage = new this(
-            '',
+            Uuid.create(),
             data.url,
             data.filename,
             currentDate,
@@ -39,6 +41,10 @@ export class StorageEntity extends AggregateRoot {
         );
         storage.record(new StorageCreatedEvent(storage))
         return storage;
+    }
+
+    delete() {
+        this.record(new StorageDeletedEvent(this))
     }
 
     toPrimitives() {

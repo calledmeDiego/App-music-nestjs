@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { Uuid } from 'src/shared/domain/value-object/Uuid.vo';
 
 import { MongoPrismaService } from 'src/shared/infrastructure/prisma/services/mongo-prisma.service';
 import { TrackEntity } from 'src/track/domain/entities/track.entity';
@@ -15,6 +16,7 @@ export class TrackMongoRepository implements TrackRepository {
 
     const createdTrack = await this.prismaService.tracks.create({
       data: {
+        id: track.id.value,
         name: track.name,
         album: track.album,
         cover: track.cover,
@@ -23,7 +25,7 @@ export class TrackMongoRepository implements TrackRepository {
           start: Number(track.duration?.start),
           end: Number(track.duration?.end)
         },
-        mediaId: track.mediaId,
+        mediaId: track.mediaId?.value,
         deletedAt: null
       }
     });
@@ -31,10 +33,10 @@ export class TrackMongoRepository implements TrackRepository {
     return TrackEntity.FromDbToEntityParse(createdTrack);
   }
 
-  async findById(id: string): Promise<TrackEntity | null> {
+  async findById(id: Uuid): Promise<TrackEntity | null> {
     const foundTrack = await this.prismaService.tracks.findUnique({
       where: {
-        id
+        id: id.value
       }
     });
 
@@ -56,10 +58,10 @@ export class TrackMongoRepository implements TrackRepository {
     return tracks;
   }
 
-  async update(id: string, track: TrackEntity): Promise<TrackEntity> {
+  async update(id: Uuid, track: TrackEntity): Promise<TrackEntity> {
 
     const updatedTrack = await this.prismaService.tracks.update({
-      where: { id },
+      where: { id: id.value },
       data: {
         name: track.name,
         album: track.album,
@@ -69,7 +71,7 @@ export class TrackMongoRepository implements TrackRepository {
           start: Number(track.duration?.start),
           end: Number(track.duration?.end)
         },
-        mediaId: track.mediaId,
+        mediaId: track.mediaId?.value,
         deletedAt: track.deletedAt
       }
     });
@@ -77,9 +79,9 @@ export class TrackMongoRepository implements TrackRepository {
 
   }
 
-  async softDelete(id: string): Promise<any> {
+  async softDelete(id: Uuid): Promise<any> {
     return await this.prismaService.tracks.update({
-      where: { id },
+      where: { id: id.value },
       data: { deletedAt: new Date() }
     });
   }

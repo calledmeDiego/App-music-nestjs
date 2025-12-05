@@ -19,8 +19,9 @@ enum Role {
   admin
 }
 
+// id        String  @id @default(auto()) @map("_id") 
 model Users {
-  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  id        String  @id @map("_id")
   email     String  @unique
   name      String?
   password  String
@@ -30,8 +31,9 @@ model Users {
   updatedAt DateTime  @updatedAt  
 }
 
+// id        String  @id @default(auto()) @map("_id") @db.ObjectId
 model Storages {
-  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  id        String  @id @map("_id")
   url       String  
   filename  String
 
@@ -51,13 +53,13 @@ type Duration {
 }
 
 model Tracks {
-  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  id        String  @id @map("_id")
   name      String?  
   album     String?
   cover     String?
   artist    Artist?
   duration  Duration?
-  mediaId   String?  @db.ObjectId 
+  mediaId   String? 
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt  

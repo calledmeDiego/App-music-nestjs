@@ -12,7 +12,7 @@ export class StorageRepresentation {
     public format() {
         const storage = this.storage.toPrimitives();
         return {
-            id: storage.id,
+            id: storage.id.value,
             url: storage.url,
             filename: storage.filename,
             createdAt: storage.createdAt.toISOString(),

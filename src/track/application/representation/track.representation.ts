@@ -17,7 +17,7 @@ export class TrackRepresentation {
         const track = this.track.toPrimitives()
 
         return {
-            id: track.id,
+            id: track.id.value,
             name: track.name,
             album: track.album,
             cover: track.cover,
