@@ -8,3 +8,5 @@ export interface TrackRepository {
     update(id: Uuid, track: TrackEntity): Promise<TrackEntity>;
     softDelete(id: Uuid): Promise<any>;
 }
+
+export const trackRepositoryName = 'TrackRepository';

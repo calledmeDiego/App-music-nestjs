@@ -7,5 +7,7 @@ export interface StorageRepository {
     listAll(): Promise<StorageEntity[]>;
     findManyById(ids: Uuid[]): Promise<StorageEntity[]>;
     update(id: Uuid, storage: StorageEntity): Promise<StorageEntity>;
-    delete(id: Uuid);
+    delete(id: Uuid): Promise<StorageEntity>;
 }
+
+export const storageRepositoryName = 'StorageRepository';

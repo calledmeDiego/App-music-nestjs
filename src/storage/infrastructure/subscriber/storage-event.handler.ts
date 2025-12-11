@@ -14,9 +14,4 @@ export class StorageEventHandler {
     handleStorageDeleted(event: StorageDeletedEvent) {
         console.log('Handler de storage eliminado ejecutado: ', event.ocurredOn)
     }
-
-    // @OnEvent('user.logued', {async: true})
-    // handleUserLogued(event: UserLoguedEvent) {
-    //     console.log('Handler login ejecutado: ', event.ocurredOn)
-    // }
 }

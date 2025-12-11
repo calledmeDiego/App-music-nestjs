@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { Uuid } from 'src/shared/domain/value-object/Uuid.vo';
 import { SqlServerPrismaService } from 'src/shared/infrastructure/prisma/services/sqlserver-prisma.service';
-import { StorageRepresentation } from 'src/storage/application/representation/storage.representation';
 
-import { StorageEntity } from 'src/storage/domain/entities/storage.entity';
 import { StorageRepository } from 'src/storage/domain/repository/storage.repository';
+import { StorageEntity } from 'src/storage/domain/entities/storage.entity';
+import { Uuid } from 'src/shared/domain/value-object/Uuid.vo';
 
 @Injectable()
 export class StorageSqlserverRepository implements StorageRepository {
@@ -12,13 +11,14 @@ export class StorageSqlserverRepository implements StorageRepository {
   constructor(private readonly prismaService: SqlServerPrismaService) { }
 
   async create(storage: StorageEntity): Promise<StorageEntity> {
-    const storageCreated = await this.prismaService.storages.create({
+    const createdStorage = await this.prismaService.storages.create({
       data: {
+        id: storage.id.value,
         filename: storage.filename,
         url: storage.url
       }
     });
-    const storageResponse = StorageEntity.FromDbToEntityParse(storageCreated);
+    const storageResponse = StorageEntity.FromDbToEntityParse(createdStorage);
 
     return storageResponse;
   }
@@ -62,20 +62,20 @@ export class StorageSqlserverRepository implements StorageRepository {
 
   async update(id: Uuid, storage: StorageEntity): Promise<StorageEntity> {
 
-    const updateStorage = await this.prismaService.storages.update({
+    const updatedStorage = await this.prismaService.storages.update({
       where: { id: id.value },
       data: {
         url: storage.url,
         filename: storage.filename,
       }
     });
-    const storageUpd = StorageEntity.FromDbToEntityParse(updateStorage)
+    const storageUpd = StorageEntity.FromDbToEntityParse(updatedStorage)
 
     return storageUpd;
 
   }
 
-  async delete(id: Uuid) {
+  async delete(id: Uuid): Promise<StorageEntity> {
 
     const deletedStorage = await this.prismaService.storages.delete({
       where: { id: id.value }
@@ -84,6 +84,5 @@ export class StorageSqlserverRepository implements StorageRepository {
     const deletedStorageRes = StorageEntity.FromDbToEntityParse(deletedStorage);
 
     return deletedStorageRes;
-
   }
 }

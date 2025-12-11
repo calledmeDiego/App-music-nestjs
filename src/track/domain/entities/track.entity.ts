@@ -12,11 +12,11 @@ export class TrackEntity extends AggregateRoot {
         public name: string | null,
         public album: string | null,
         public cover: string | null,
-        public readonly artist: Artist | null,
-        public readonly duration: Duration | null,
+        public artist: Artist | null,
+        public duration: Duration | null,
         public mediaId: Uuid | null,
-        public readonly createdAt: Date,
-        public readonly updatedAt: Date,
+        public createdAt: Date,
+        public updatedAt: Date,
         public deletedAt: Date | null
     ) { super() }
 
@@ -44,29 +44,27 @@ export class TrackEntity extends AggregateRoot {
         return track;
     }
 
-    static update(data: {
-        id: string
+    update(data: {
         name?: string | null,
         album?: string | null,
         cover?: string | null,
         artist?: Artist | null,
         duration?: Duration | null,
         mediaId?: string
-        createdAt: Date
     }) {
-        const track = new this(
-            Uuid.fromString(data.id),
-            data.name ?? null,
-            data.album ?? null,
-            data.cover ?? null,
-            data.artist ?? null,
-            data.duration ?? null,
-            data.mediaId ? Uuid.fromString(data.mediaId) : null,
-            data.createdAt,
-            new Date(),
-            null);
-        track.record(new TrackUpdatedEvent(track));
-        return track;
+        this.name = data.name ?? null;
+        this.album = data.album ?? null
+        this.cover = data.cover ?? null;
+
+        this.artist = data.artist ?? null;
+        this.duration = data.duration ?? null;
+
+        this.mediaId = data.mediaId ? Uuid.fromString(data.mediaId) : null;
+
+        this.updatedAt = new Date();
+        
+        this.record(new TrackUpdatedEvent(this));
+        return this;
     }
 
     rename(newName: string) {

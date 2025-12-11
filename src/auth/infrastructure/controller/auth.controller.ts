@@ -57,7 +57,6 @@ export class AuthController {
   @Post('/login')
   async loginUser(@Body() body: LoginUserDTO, @Res() response: Response) {
     const userLogued = await this.userService.loginUser(body);
-    console.log(`Estoy en controller`)
     return response.status(HttpStatus.OK).json(userLogued);
   }
 }

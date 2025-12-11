@@ -32,6 +32,7 @@ export class TrackSqlServerRepository implements TrackRepository {
 
         const createdTrack = await this.prismaService.tracks.create({
             data: {
+                id: track.id.value,
                 name: track.name,
                 album: track.album,
                 cover: track.cover,
@@ -86,7 +87,7 @@ export class TrackSqlServerRepository implements TrackRepository {
             name: <string>track.artist?.name,
             nickname: <string>track.artist?.nickname,
             nationality: <string>track.artist?.nationality,
-        });        
+        });
 
         const updatedTrack = await this.prismaService.tracks.update({
             where: { id: id.value },
@@ -94,7 +95,7 @@ export class TrackSqlServerRepository implements TrackRepository {
                 name: track.name,
                 album: track.album,
                 cover: track.cover,
-                updatedAt: new Date(),
+                updatedAt: track.updatedAt,
                 artist: {
                     connect: { id: artistId }
                 },
@@ -104,8 +105,8 @@ export class TrackSqlServerRepository implements TrackRepository {
                         end: Number(track.duration.end!)
                     },
                 } : undefined,
-                media: track.mediaId ? { 
-                    connect: { id: track.mediaId.value}
+                media: track.mediaId ? {
+                    connect: { id: track.mediaId.value }
                 } : undefined,
             },
             include: {

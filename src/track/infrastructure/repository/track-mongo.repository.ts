@@ -67,6 +67,7 @@ export class TrackMongoRepository implements TrackRepository {
         album: track.album,
         cover: track.cover,
         artist: track.artist,
+        updatedAt: track.updatedAt,
         duration: {
           start: Number(track.duration?.start),
           end: Number(track.duration?.end)

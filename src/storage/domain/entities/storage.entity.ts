@@ -1,7 +1,7 @@
 import { AggregateRoot } from "src/shared/domain/events/aggregate-root";
+import { Uuid } from "src/shared/domain/value-object/Uuid.vo";
 import { StorageCreatedEvent } from "../events/storage-created.event";
 import { StorageDeletedEvent } from "../events/storage-deleted.event";
-import { Uuid } from "src/shared/domain/value-object/Uuid.vo";
 
 export class StorageEntity extends AggregateRoot {
     private constructor(
@@ -11,7 +11,6 @@ export class StorageEntity extends AggregateRoot {
         public readonly createdAt: Date,
         public readonly updatedAt: Date,
     ) { super() }
-
 
     static fromPrimitives({ id, url, filename,createdAt, updatedAt }: {
         id: string,
@@ -61,6 +60,4 @@ export class StorageEntity extends AggregateRoot {
     static FromDbToEntityParse(data) {
         return StorageEntity.fromPrimitives(data);
     }
-
-
 }

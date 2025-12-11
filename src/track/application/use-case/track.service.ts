@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import type { TrackRepository } from 'src/track/domain/repository/track.repository';
-import type { StorageRepository } from 'src/storage/domain/repository/storage.repository';
+import { trackRepositoryName, type TrackRepository } from 'src/track/domain/repository/track.repository';
+import { storageRepositoryName, type StorageRepository } from 'src/storage/domain/repository/storage.repository';
 import { type EventBus, eventBusDefinition } from 'src/shared/domain/events/event-bus';
 
 import { TrackEntity } from 'src/track/domain/entities/track.entity';
@@ -22,8 +22,8 @@ import { Uuid } from 'src/shared/domain/value-object/Uuid.vo';
 @Injectable()
 export class TrackService {
   constructor(
-    @Inject('TrackRepository') private readonly trackRepository: TrackRepository,
-    @Inject('StorageRepository') private readonly storageRepository: StorageRepository,
+    @Inject(trackRepositoryName) private readonly trackRepository: TrackRepository,
+    @Inject(storageRepositoryName) private readonly storageRepository: StorageRepository,
     @Inject(eventBusDefinition.name) private readonly eventBus: EventBus) { }
 
   async createTrack(data: CreateTrackDTO) {
@@ -44,7 +44,7 @@ export class TrackService {
     }
     );
 
-    const storage = trackCreated.mediaId ? await this.storageRepository.findById(trackCreated.mediaId): null;
+    const storage = trackCreated.mediaId ? await this.storageRepository.findById(trackCreated.mediaId) : null;
 
     this.eventBus.publish(trackCreated.pullEvents());
 
@@ -79,39 +79,31 @@ export class TrackService {
 
   async updateTrack(id: string, data: CreateTrackDTO) {
     try {
-
       const trackId = Uuid.fromString(id)
 
       const existingTrack = await this.trackRepository.findById(trackId);
-
-      if (!existingTrack) {
-        throw new TrackNotFoundException();
-      }
+      if (!existingTrack) throw new TrackNotFoundException();
 
       const artist = data.artist ? Artist.create(data.artist) : null;
-
       if (!artist) throw new ArtistNullException();
 
       const duration = data.duration ? Duration.create(data.duration) : null;
-
       if (!duration) throw new DurationNullException();
 
       const storageId = Uuid.fromString(data.mediaId);
       const storage = await this.storageRepository.findById(storageId);
 
-      const track = TrackEntity.update({
-        id,
+      existingTrack.update({
         name: data.name,
         album: data.album,
         cover: data.cover,
         artist,
         duration,
         mediaId: storage?.id.value,
-        createdAt: existingTrack.createdAt
-      });
+      })
 
-      this.eventBus.publish(track.pullEvents());
-      const updatedTrack = await this.trackRepository.update(trackId, track);
+      this.eventBus.publish(existingTrack.pullEvents());
+      const updatedTrack = await this.trackRepository.update(trackId, existingTrack);
 
       return TrackRepresentation.fromTrack(updatedTrack, storage).format()
 
@@ -142,30 +134,32 @@ export class TrackService {
     const trackId = Uuid.fromString(id)
     const storageId = data.mediaId ? Uuid.fromString(data.mediaId) : null;
 
-    const trackFound = await this.trackRepository.findById(trackId);
+    const existingTrack = await this.trackRepository.findById(trackId);
+
     let storage: StorageEntity | null;
-    if (!trackFound) throw new TrackNotFoundException();
-    if (storageId === null && trackFound.id === null) {
-       storage = null
+
+    if (!existingTrack) throw new TrackNotFoundException();
+
+    if (storageId === null && existingTrack.id === null) {
+      storage = null
     }
-    storage = await this.storageRepository.findById(storageId || trackFound.mediaId!);
+    storage = await this.storageRepository.findById(storageId || existingTrack.mediaId!);
 
     // Si no encuentra storage,
     if (!storage) throw new StorageNotFoundException();
 
-    const track = TrackEntity.update({
-      id,
-      name: data.name ? data.name : trackFound.name,
-      album: data.album || trackFound.album,
-      cover: data.cover ? data.cover : trackFound.cover,
-      artist: trackFound.artist,
-      duration: trackFound.duration,
+    existingTrack.update({
+      name: data.name ? data.name : existingTrack.name,
+      album: data.album ? data.album : existingTrack.album,
+      cover: data.cover ? data.cover : existingTrack.cover,
+      artist: existingTrack.artist,
+      duration: existingTrack.duration,
       mediaId: storage.id.value ?? null,
-      createdAt: trackFound.createdAt
-    });
+    })
 
-    this.eventBus.publish(track.pullEvents());
-    const updatedTrack = await this.trackRepository.update(track.id, track);
+    this.eventBus.publish(existingTrack.pullEvents());
+
+    const updatedTrack = await this.trackRepository.update(existingTrack.id, existingTrack);
 
     return TrackRepresentation.fromTrack(updatedTrack, storage).format()
 
