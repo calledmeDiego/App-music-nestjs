@@ -5,7 +5,7 @@ import { AuthController } from '../controller/auth.controller';
 import { EnvService } from 'src/shared/infrastructure/config/env.service';
 
 import { AuthMongoRepository } from '../repository/auth-mongo.repository';
-import { AuthSqlServerRepository } from '../repository/auth-sqlserver.repository';
+// import { AuthSqlServerRepository } from '../repository/auth-sqlserver.repository';
 import { BcryptPasswordEncrypter } from '../security/password-encrypter.service';
 import { JwtTokenService } from '../security/jwt-token.service';
 
@@ -25,7 +25,7 @@ import { DATABASE_INSTANCE } from 'src/shared/domain/constants/db-instance';
       provide: authRepositoryName,
       useFactory: (dbInstance: any, envService: EnvService) => {
         const dbProvider = envService.dbProvider.trim();
-        return dbProvider === 'mongo' ? new AuthMongoRepository(dbInstance) : new AuthSqlServerRepository(dbInstance);
+        return dbProvider === 'mongo' ? new AuthMongoRepository(dbInstance) : '';
       },
       inject: [DATABASE_INSTANCE, EnvService]
 

@@ -82,5 +82,10 @@ Si este proyecto te fue útil:
 - 🐛 Reporta bugs o sugiere mejoras
 - 📺 Mira el [video original](https://github.com/calledmeDiego) para más contexto
 
+## 🎁 Branches
+
+- `master`: soporta SQL Server y MongoDB
+- `cloud-mongo`: versión en producción (Solo MongoDB)
+
 
 🎵 Desarrollado con pasión por [Diego Gabriel](https://github.com/calledmeDiego)

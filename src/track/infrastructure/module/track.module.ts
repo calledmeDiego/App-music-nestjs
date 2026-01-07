@@ -4,7 +4,7 @@ import { TrackController } from '../controller/track.controller';
 import { TrackService } from 'src/track/application/use-case/track.service';
 
 import { TrackMongoRepository } from '../repository/track-mongo.repository';
-import { TrackSqlServerRepository } from '../repository/track-sqlserver.repository';
+// import { TrackSqlServerRepository } from '../repository/track-sqlserver.repository';
 
 import { AuthModule } from 'src/auth/infrastructure/module/auth.module';
 import { StorageModule } from 'src/storage/infrastructure/module/storage.module';
@@ -23,7 +23,7 @@ import { DATABASE_INSTANCE } from 'src/shared/domain/constants/db-instance';
       provide: trackRepositoryName,
       useFactory: (dbInstance: any, envService: EnvService) => {
         const dbProvider = envService.dbProvider.trim();
-        return dbProvider === 'mongo' ? new TrackMongoRepository(dbInstance) : new TrackSqlServerRepository(dbInstance);
+        return dbProvider === 'mongo' ? new TrackMongoRepository(dbInstance) : 'new TrackSqlServerRepository(dbInstance)';
       },
       inject: [DATABASE_INSTANCE, EnvService]
     }

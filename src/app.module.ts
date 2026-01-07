@@ -9,7 +9,6 @@ import { SlackLoggerService } from './shared/infrastructure/logging/slack-logger
 
 import { EnvService } from './shared/infrastructure/config/env.service';
 import { MongoPrismaService } from './shared/infrastructure/prisma/services/mongo-prisma.service';
-import { SqlServerPrismaService } from './shared/infrastructure/prisma/services/sqlserver-prisma.service';
 import { EventEmitterService } from './shared/infrastructure/services/event-emitter.service';
 
 import { eventBusDefinition } from './shared/domain/events/event-bus';
