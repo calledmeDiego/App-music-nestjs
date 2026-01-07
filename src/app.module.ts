@@ -48,11 +48,12 @@ import { DATABASE_INSTANCE } from './shared/domain/constants/db-instance';
             const mongoService = new MongoPrismaService();
             await mongoService.onModuleInit();
             globalThis['dbInstance'] = mongoService;
-          } else {
-            const sqlService = new SqlServerPrismaService();
-            await sqlService.onModuleInit();
-            globalThis['dbInstance'] = sqlService;
-          }
+          } 
+          // else {
+          //   const sqlService = new SqlServerPrismaService();
+          //   await sqlService.onModuleInit();
+          //   globalThis['dbInstance'] = sqlService;
+          // }
         }
         return globalThis['dbInstance'];
       },

@@ -20,7 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "generate:sql": "prisma generate --schema=prisma/sqlserver/schema.prisma",
     "generate:mongo": "prisma generate --schema=prisma/mongodb/schema.prisma",
-    "postinstall": "npm run generate:sql && npm run generate:mongo"
+    "postinstall": "npm run generate:mongo"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
