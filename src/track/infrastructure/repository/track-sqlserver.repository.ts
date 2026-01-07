@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
+import { TrackEntity } from "src/track/domain/entities/track.entity";
+import { TrackRepository } from "src/track/domain/repository/track.repository";
 import { Uuid } from "src/shared/domain/value-object/Uuid.vo";
 
 import { SqlServerPrismaService } from "src/shared/infrastructure/prisma/services/sqlserver-prisma.service";
-import { TrackEntity } from "src/track/domain/entities/track.entity";
-import { TrackRepository } from "src/track/domain/repository/track.repository";
 
 @Injectable()
 export class TrackSqlServerRepository implements TrackRepository {
@@ -83,11 +83,14 @@ export class TrackSqlServerRepository implements TrackRepository {
     }
 
     async update(id: Uuid, track: TrackEntity): Promise<TrackEntity> {
-        const artistId = await this.createorUpdateArtist({
-            name: <string>track.artist?.name,
-            nickname: <string>track.artist?.nickname,
-            nationality: <string>track.artist?.nationality,
-        });
+        let artistId: string | undefined;
+        if (track.artist) {
+            artistId = await this.createorUpdateArtist({
+                name: <string>track.artist.name,
+                nickname: <string>track.artist.nickname,
+                nationality: <string>track.artist.nationality,
+            });
+        }
 
         const updatedTrack = await this.prismaService.tracks.update({
             where: { id: id.value },
@@ -132,9 +135,8 @@ export class TrackSqlServerRepository implements TrackRepository {
         nickname: string,
         nationality: string
     }) {
-        const existingArtist = await this.findArtist(artist.name);
 
-        let artistId: string | null;
+        const existingArtist = await this.findArtist(artist.name);
 
         if (existingArtist) {
             const updatedArtist = await this.prismaService.artist.update({
@@ -147,19 +149,18 @@ export class TrackSqlServerRepository implements TrackRepository {
                 }
             });
 
-            artistId = updatedArtist.id;
-        } else {
-
-            const createdArtist = await this.prismaService.artist.create({
-                data: {
-                    name: artist.name,
-                    nickname: artist.nickname,
-                    nationality: artist.nationality,
-                },
-            });
-            artistId = createdArtist.id;
+            return updatedArtist.id
         }
-        return artistId;
+
+        const createdArtist = await this.prismaService.artist.create({
+            data: {
+                name: artist.name,
+                nickname: artist.nickname,
+                nationality: artist.nationality,
+            },
+        });
+
+        return createdArtist.id;
     }
 
     async findArtist(artist: string) {

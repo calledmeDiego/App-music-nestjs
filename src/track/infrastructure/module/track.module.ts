@@ -16,8 +16,8 @@ import { trackRepositoryName } from 'src/track/domain/repository/track.repositor
 import { DATABASE_INSTANCE } from 'src/shared/domain/constants/db-instance';
 
 @Module({
-  controllers: [TrackController],
   imports: [AuthModule, StorageModule],
+  controllers: [TrackController],
   providers: [TrackService,TrackEventHandler,
     {
       provide: trackRepositoryName,
@@ -28,6 +28,9 @@ import { DATABASE_INSTANCE } from 'src/shared/domain/constants/db-instance';
       inject: [DATABASE_INSTANCE, EnvService]
     }
   ],
+  exports: [
+    trackRepositoryName
+  ]
 })
 export class TrackModule {
 

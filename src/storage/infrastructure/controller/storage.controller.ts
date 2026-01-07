@@ -1,14 +1,21 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Request, Put, HttpStatus, Res, UseGuards } from '@nestjs/common';
-import { StorageService } from '../../application/use-case/storage.service';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, HttpStatus, Res, UseGuards } from '@nestjs/common';
+
 import { FileInterceptor } from '@nestjs/platform-express';
-import { multerConfig } from '../config/storage.config';
-import { GetIdDTO } from 'src/shared/application/dto/get-id.dto';
-import type { Response } from 'express';
-import { UploadedFileError } from 'src/storage/domain/exception/file-upload.exception';
-import { AuthGuard } from 'src/auth/infrastructure/guards/auth.guard';
-import { RolesGuard } from 'src/auth/infrastructure/guards/roles.guard';
-import { Roles } from 'src/auth/infrastructure/decorators/roles.decorator';
+
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+
+import type { Response } from 'express';
+
+import { StorageService } from '../../application/use-case/storage.service';
+
+import { multerConfig } from '../config/storage.config';
+import { UploadedFileError } from 'src/storage/domain/exception/file-upload.exception';
+
+import { AuthGuard } from 'src/auth/infrastructure/guards/auth.guard';
+import { Roles } from 'src/auth/infrastructure/decorators/roles.decorator';
+import { RolesGuard } from 'src/auth/infrastructure/guards/roles.guard';
+
+import { GetIdDTO } from 'src/shared/application/dto/get-id.dto';
 
 @ApiTags('Storage - Endpoints de archivos audio o imagen')
 @Controller('storage')

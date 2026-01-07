@@ -1,9 +1,10 @@
 import { Controller, Post, Body, Res, HttpStatus } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
+import { AuthService } from 'src/auth/application/use-case/auth.service';
+
 import { LoginUserDTO } from 'src/auth/application/dto/login-user.dto';
 import { RegisterUserDTO } from 'src/auth/application/dto/register-user.dto';
-import { AuthService } from 'src/auth/application/use-case/auth.service';
 
 @ApiTags('Auth - Endpoints de autenticación')
 @Controller('')

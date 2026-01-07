@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
+
+import { TrackEntity } from 'src/track/domain/entities/track.entity';
+import { TrackRepository } from 'src/track/domain/repository/track.repository';
 import { Uuid } from 'src/shared/domain/value-object/Uuid.vo';
 
 import { MongoPrismaService } from 'src/shared/infrastructure/prisma/services/mongo-prisma.service';
-import { TrackEntity } from 'src/track/domain/entities/track.entity';
-import { TrackRepository } from 'src/track/domain/repository/track.repository';
 
 
 
@@ -25,7 +26,7 @@ export class TrackMongoRepository implements TrackRepository {
           start: Number(track.duration?.start),
           end: Number(track.duration?.end)
         },
-        mediaId: track.mediaId?.value,
+        mediaId: track.mediaId ? track.mediaId.value : null,
         deletedAt: null
       }
     });
@@ -49,6 +50,7 @@ export class TrackMongoRepository implements TrackRepository {
   async list(): Promise<TrackEntity[]> {
     const allTracks = await this.prismaService.tracks.findMany({
       where: { deletedAt: null },
+      orderBy: {createdAt: 'desc'},
     });
 
     const tracks = allTracks.map((t) => {
@@ -73,7 +75,6 @@ export class TrackMongoRepository implements TrackRepository {
           end: Number(track.duration?.end)
         },
         mediaId: track.mediaId?.value,
-        deletedAt: track.deletedAt
       }
     });
     return TrackEntity.FromDbToEntityParse(updatedTrack)
@@ -81,9 +82,11 @@ export class TrackMongoRepository implements TrackRepository {
   }
 
   async softDelete(id: Uuid): Promise<any> {
-    return await this.prismaService.tracks.update({
+    const deleted = await this.prismaService.tracks.update({
       where: { id: id.value },
       data: { deletedAt: new Date() }
     });
+    return TrackEntity.FromDbToEntityParse(deleted);
+
   }
 }

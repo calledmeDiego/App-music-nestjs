@@ -1,12 +1,16 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Put, UseGuards, Res, HttpStatus } from '@nestjs/common';
-import { TrackService } from '../../application/use-case/track.service';
-import { CreateTrackDTO } from '../../application/dto/create-track.dto';
-import { GetIdDTO } from 'src/shared/application/dto/get-id.dto';
-import { AuthGuard } from 'src/auth/infrastructure/guards/auth.guard';
-import { RolesGuard } from 'src/auth/infrastructure/guards/roles.guard';
-import { Roles } from 'src/auth/infrastructure/decorators/roles.decorator';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+
 import type { Response } from 'express';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+
+import { AuthGuard } from 'src/auth/infrastructure/guards/auth.guard';
+import { Roles } from 'src/auth/infrastructure/decorators/roles.decorator';
+import { RolesGuard } from 'src/auth/infrastructure/guards/roles.guard';
+
+import { TrackService } from '../../application/use-case/track.service';
+
+import { GetIdDTO } from 'src/shared/application/dto/get-id.dto';
+import { CreateTrackDTO } from '../../application/dto/create-track.dto';
 import { UpdateTrackDTO } from 'src/track/application/dto/update-track.dto';
 
 @ApiTags('Tracks - Endpoints de pistas de música')
@@ -213,10 +217,51 @@ export class TrackController {
   }
 
   @Patch('/:id')
+  @Roles('admin')
+  @ApiOperation({ summary: 'Obtiene y actualiza algunos datos de una canción subida al sistema. * [SOLO ADMINISTRADORES]' })
+  @ApiBearerAuth('JWT-auth')
+  @ApiParam({
+    name: 'id',
+    type: 'string',
+    description: 'ID único del archivo',
+    example: 'ID',
+    required: true
+  })
+  @ApiBody({
+    type: UpdateTrackDTO,
+    description: 'Estructura del JSON para editar la canción'
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Canción editada exitosamente.',
+    schema: {
+      example: {
+        id: 'ID',
+        name: 'In Bloom',
+        album: 'Nevermind',
+        media: {
+          id: 'ID',
+          url: 'URL del archivo',
+          filename: 'Nombre del archivo',
+          createdAt: 'Fecha de creación',
+        },
+        cover: 'https://example.com/cover.jpg',
+        artist: {
+          name: 'Nirvana',
+          nickname: 'Nirvana',
+          nationality: 'Estadounidense'
+        },
+        duration: {
+          start: 0,
+          end: 180
+        },
+        createdAt: '2023-10-13T20:00:00.000Z'
+      }
+    }
+  })
   async patchTrack(@Param() paramId: GetIdDTO, @Body() body: UpdateTrackDTO, @Res() res: Response) {
     const patchedTrack = await this.trackService.updatePartialTrack(paramId.id, body);
     return res.status(HttpStatus.OK).json(patchedTrack);
   }
-
 
 }
