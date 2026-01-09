@@ -58,7 +58,7 @@ export class StorageController {
     }
   })
   async createStorage(@UploadedFile() file: Express.Multer.File, @Res() res: Response) {
-
+    
     if (!file) {
       throw new UploadedFileError();
     }
@@ -122,7 +122,7 @@ export class StorageController {
   @Delete(':id')
   @Roles('admin')
   @ApiOperation({ summary: 'Elimina un archivo subido al sistema. * [SOLO ADMINISTRADORES]' })
-  @ApiBearerAuth('JWT-auth') 
+  @ApiBearerAuth('JWT-auth')
   @ApiParam({
     name: 'id',
     type: 'string',
